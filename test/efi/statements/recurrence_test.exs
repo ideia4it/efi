@@ -5,10 +5,10 @@ defmodule Efi.Statements.RecurrenceTest do
 
   setup {Req.Test, :verify_on_exit!}
 
-  @host "extratos-h.api.efipay.com.br"
+  @host "extratos.api.efipay.com.br"
 
   test "schedules a daily statement, turns on compression and finds it among the schedules" do
-    client = Efi.Test.client()
+    client = Efi.Test.client(environment: :production)
 
     Efi.Test.expect(:post, "#{@host}/v1/extrato-cnab/agendar", fn conn, body ->
       assert body == %{

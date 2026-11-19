@@ -95,8 +95,8 @@ defmodule Efi.Charges.Card do
   end
 
   @doc """
-  Estorna um pagamento de cartão `paid`. Sem corpo, o estorno é total; com
-  `%{"amount" => 1000}`, estorna só esse valor em centavos.
+  Estorna um pagamento de cartão `paid`. Sem `json` nas opções, o estorno é total; com
+  `json: %{"amount" => 1000}`, estorna só esse valor em centavos.
 
   O estorno parcial vale até 90 dias depois da confirmação, e um por dia; o total, até 360
   dias. Não há estorno enquanto outro da mesma cobrança está em processamento, nem para venda
@@ -106,12 +106,10 @@ defmodule Efi.Charges.Card do
 
   [Documentação da Efí](https://dev.efipay.com.br/docs/api-cobrancas/cartao#estorno-de-pagamento-via-cartão-de-crédito)
   """
-  @spec refund(Client.t(), charge_id(), map(), keyword()) :: Efi.result()
-  def refund(client, charge_id, body \\ %{}, opts \\ [])
-
-  def refund(%Client{} = client, charge_id, body, opts) when is_map(body) do
+  @spec refund(Client.t(), charge_id(), keyword()) :: Efi.result()
+  def refund(%Client{} = client, charge_id, opts \\ []) do
     path = Client.path("/v1/charge/card/:id/refund", id: charge_id)
-    Client.request(client, :charges, :post, path, Keyword.put(opts, :json, body))
+    Client.request(client, :charges, :post, path, Keyword.put_new(opts, :json, %{}))
   end
 
   @doc """

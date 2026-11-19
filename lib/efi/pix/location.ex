@@ -19,9 +19,9 @@ defmodule Efi.Pix.Location do
         })
 
       {:ok, %{"imagemQrcode" => image, "linkVisualizacao" => link}} =
-        Efi.Pix.Location.qr_code(client, location_id)
+        Efi.Pix.Location.get_qr_code(client, location_id)
 
-  `qr_code/3` devolve o Pix Copia e Cola em `qrcode`, a imagem do QR Code como data URI em
+  `get_qr_code/3` devolve o Pix Copia e Cola em `qrcode`, a imagem do QR Code como data URI em
   `imagemQrcode`, pronta para um `<img src>`, e em `linkVisualizacao` uma página da Efí com a
   cobrança e o QR Code para mandar a quem paga. Esse link só funciona para cobranças de produção.
 
@@ -91,8 +91,8 @@ defmodule Efi.Pix.Location do
 
   [Documentação da Efí](https://dev.efipay.com.br/docs/api-pix/payload-locations#gerar-qr-code-de-um-location)
   """
-  @spec qr_code(Client.t(), integer() | String.t(), keyword()) :: Efi.result()
-  def qr_code(%Client{} = client, id, opts \\ []) do
+  @spec get_qr_code(Client.t(), integer() | String.t(), keyword()) :: Efi.result()
+  def get_qr_code(%Client{} = client, id, opts \\ []) do
     Client.request(client, :pix, :get, Client.path("/v2/loc/:id/qrcode", id: id), opts)
   end
 end

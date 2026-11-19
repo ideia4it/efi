@@ -35,9 +35,10 @@ defmodule Efi.Pix.Send do
   ## Escopos e limites
 
   Cada rota exige o escopo dela liberado na aplicação. Aplicações criadas antes de 29/07/2024
-  precisam desativar e ativar de novo o escopo `pix.send`. Aplicações das contas abertas por um
-  parceiro (`Efi.Accounts.SimplifiedAccount`) nunca recebem `pix.send`, `gn.pix.send.read`,
-  `gn.qrcodes.pay` e `gn.qrcodes.read`: o parceiro não envia Pix pela conta do cliente.
+  precisam desativar e ativar de novo o escopo `pix.send`. Quando um parceiro pede a conta de um
+  cliente que já tem conta Efí (`Efi.Accounts.SimplifiedAccount`) e o cliente escolhe criar só
+  uma aplicação na conta atual, essa aplicação nunca recebe `pix.send`, `gn.pix.send.read`,
+  `gn.qrcodes.pay` e `gn.qrcodes.read`: o parceiro não envia Pix por ela.
 
   Em produção, cada conta tem um limite diário de envio pré-aprovado, e só conta Efí Empresas
   pode alterá-lo. Envio para chave também consome fichas do balde da conta: com o balde vazio, a

@@ -2,13 +2,15 @@ defmodule Efi.Token do
   @moduledoc """
   Token de acesso OAuth2 de uma API da Efí.
 
-  A Efí entrega o token com `expires_in` em segundos (3600 hoje). `expires_at` é calculado na
-  chegada, e `usable?/2` considera o token vencido um minuto antes, para que uma requisição lenta
-  não chegue à Efí com um token que expirou no caminho.
+  A Efí entrega o token com `expires_in` em segundos: uma hora na maioria das APIs, 10 minutos
+  na Cobranças. `expires_at` é calculado na chegada, e `usable?/2` considera o token vencido um
+  minuto antes, para que uma requisição lenta não chegue à Efí com um token que expirou no
+  caminho. O `inspect` esconde o `access_token`.
   """
 
   @safety_margin_seconds 60
 
+  @derive {Inspect, except: [:access_token]}
   @enforce_keys [:access_token, :token_type, :expires_at]
   defstruct [:access_token, :token_type, :expires_at, :scope]
 

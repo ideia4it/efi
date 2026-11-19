@@ -5,11 +5,11 @@ defmodule Efi.Statements.CnabFileTest do
 
   setup {Req.Test, :verify_on_exit!}
 
-  @host "extratos-h.api.efipay.com.br"
+  @host "extratos.api.efipay.com.br"
   @file_name "EFI_00000000_20261118_000000_CNAB_240.txt"
 
   test "finds yesterday's statement among the generated files and downloads it as it came" do
-    client = Efi.Test.client()
+    client = Efi.Test.client(environment: :production)
     cnab = "36400000         2112223330001810000000000000000000000STUDIO ANA LTDA\r\n"
 
     Efi.Test.expect(:get, "#{@host}/v1/extrato-cnab/arquivos", fn conn, _body ->
@@ -38,7 +38,7 @@ defmodule Efi.Statements.CnabFileTest do
   end
 
   test "reports a file the Efí cannot find with its message" do
-    client = Efi.Test.client()
+    client = Efi.Test.client(environment: :production)
 
     Efi.Test.expect(
       :get,

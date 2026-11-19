@@ -3,6 +3,8 @@ defmodule Efi.DocumentationTest do
 
   alias Efi.Dev.Documentation
 
+  @path_value "valor-do-caminho"
+
   test "every API function names its route and links to its section of Efí's documentation" do
     undocumented =
       for module <- Documentation.api_modules(),
@@ -31,4 +33,31 @@ defmodule Efi.DocumentationTest do
 
     assert missing == []
   end
+
+  test "every API function sends the method and path its documentation names" do
+    client = Efi.Test.client(environment: :production)
+
+    Req.Test.stub(Efi.Test.stub(), fn conn ->
+      Req.Test.json(conn, "#{conn.method} #{conn.request_path}")
+    end)
+
+    mismatches =
+      for module <- Documentation.api_modules(),
+          {{^module, name, arity}, text} <- Documentation.function_docs(module),
+          [{method, path}] = Documentation.routes(text),
+          arguments =
+            module
+            |> Documentation.parameter_names(name, arity)
+            |> Enum.map(&argument(&1, client)),
+          {:ok, called} = apply(module, name, arguments),
+          called != "#{method} #{String.replace(path, ":param", @path_value)}",
+          do: {module, name, called}
+
+    assert mismatches == []
+  end
+
+  defp argument(:client, client), do: client
+  defp argument(:opts, _client), do: []
+  defp argument(:params, _client), do: %{}
+  defp argument(_path_value_or_body, _client), do: @path_value
 end

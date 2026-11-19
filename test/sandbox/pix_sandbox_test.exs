@@ -33,7 +33,7 @@ defmodule Efi.Sandbox.PixTest do
     assert is_binary(copy_paste)
 
     assert {:ok, %{"imagemQrcode" => "data:image/png;base64," <> _png}} =
-             Location.qr_code(client, location_id)
+             Location.get_qr_code(client, location_id)
 
     now = DateTime.utc_now()
 

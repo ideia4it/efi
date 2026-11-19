@@ -5,11 +5,11 @@ defmodule Efi.BillPayments.WebhookTest do
 
   setup {Req.Test, :verify_on_exit!}
 
-  @host "pagarcontas-h.api.efipay.com.br"
+  @host "pagarcontas.api.efipay.com.br"
   @webhook_url "https://app.example.com/efi/pagamentos"
 
   test "registers the payment webhook, finds it in the period and deletes it by url" do
-    client = Efi.Test.client()
+    client = Efi.Test.client(environment: :production)
 
     Efi.Test.expect(:put, "#{@host}/v1/webhook", fn conn, body ->
       assert body == %{"url" => @webhook_url}

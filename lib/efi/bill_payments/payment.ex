@@ -10,17 +10,17 @@ defmodule Efi.BillPayments.Payment do
        beneficiário, pagador, multa, juros, desconto e, em `informacoesPagamento`, se aceita
        valor divergente ou parcial; `"tributo"`, de concessionárias e convênios, traz só valor
        e vencimento.
-    2. `create/4` pede o pagamento para hoje ou para uma data futura. O `valor` é inteiro, em
+    2. `pay/4` pede o pagamento para hoje ou para uma data futura. O `valor` é inteiro, em
        centavos (R$ 10,00 é `1000`), ao contrário da API Pix.
-    3. `get/3` acompanha a solicitação pelo `idPagamento`, e `summary/3` conta as solicitações
-       de um período.
+    3. `get/3` acompanha a solicitação pelo `idPagamento`, e `get_summary/3` conta as
+       solicitações de um período.
 
-  `get_barcode/3` e `create/4` aceitam o código de barras ou a linha digitável.
+  `get_barcode/3` e `pay/4` aceitam o código de barras ou a linha digitável.
 
       {:ok, bill} = Efi.BillPayments.Payment.get_barcode(client, barcode)
 
       {:ok, %{"idPagamento" => payment_id}} =
-        Efi.BillPayments.Payment.create(client, barcode, %{
+        Efi.BillPayments.Payment.pay(client, barcode, %{
           "valor" => bill["valores"]["final"],
           "dataPagamento" => "2026-11-19",
           "descricao" => "Conta de luz do Studio Ana"
@@ -67,8 +67,8 @@ defmodule Efi.BillPayments.Payment do
 
   [Documentação da Efí](https://dev.efipay.com.br/docs/api-pagamento-de-contas/pagamentos#solicitar-pagamento-de-código-de-barras)
   """
-  @spec create(Client.t(), String.t(), map(), keyword()) :: Efi.result()
-  def create(%Client{} = client, barcode, body, opts \\ []) do
+  @spec pay(Client.t(), String.t(), map(), keyword()) :: Efi.result()
+  def pay(%Client{} = client, barcode, body, opts \\ []) do
     Client.request(
       client,
       :bill_payments,
@@ -99,8 +99,8 @@ defmodule Efi.BillPayments.Payment do
 
   [Documentação da Efí](https://dev.efipay.com.br/docs/api-pagamento-de-contas/pagamentos#consultar-resumo-de-solicitações-de-pagamento)
   """
-  @spec summary(Client.t(), map() | keyword(), keyword()) :: Efi.result()
-  def summary(%Client{} = client, params, opts \\ []) do
+  @spec get_summary(Client.t(), map() | keyword(), keyword()) :: Efi.result()
+  def get_summary(%Client{} = client, params, opts \\ []) do
     Client.request(client, :bill_payments, :get, "/v1/resumo", Keyword.put(opts, :params, params))
   end
 

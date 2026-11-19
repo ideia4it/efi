@@ -33,6 +33,16 @@ defmodule Efi.ClientTest do
                  certificate: "producao.p12"
                )
     end
+
+    test "keeps the secret, the partner token and the access token out of inspect and crash reports" do
+      client = Efi.Test.client(partner_token: "parceiro-studio-ana")
+      inspected = inspect({client, token("token-secreto", expires_in: 600)})
+
+      assert inspected =~ "Client_Id_studio_ana"
+      refute inspected =~ "Client_Secret_studio_ana"
+      refute inspected =~ "parceiro-studio-ana"
+      refute inspected =~ "token-secreto"
+    end
   end
 
   describe "access token" do
@@ -139,16 +149,16 @@ defmodule Efi.ClientTest do
                ImmediateCharge.get(client, "abc")
     end
 
-    test "authorizes each API on its own token route and keeps the tokens apart" do
-      client = Efi.Test.client(token_store: ProcessTokenStore)
+    test "authorizes each API on its own production token route and keeps the tokens apart" do
+      client = Efi.Test.client(environment: :production, token_store: ProcessTokenStore)
 
       routes = [
-        pix: "pix-h.api.efipay.com.br/oauth/token",
-        charges: "cobrancas-h.api.efipay.com.br/v1/authorize",
-        open_finance: "openfinance-h.api.efipay.com.br/v1/oauth/token",
-        accounts: "abrircontas-h.api.efipay.com.br/v1/oauth/token",
-        bill_payments: "pagarcontas-h.api.efipay.com.br/v1/oauth/token",
-        statements: "extratos-h.api.efipay.com.br/v1/oauth/token"
+        pix: "pix.api.efipay.com.br/oauth/token",
+        charges: "cobrancas.api.efipay.com.br/v1/authorize",
+        open_finance: "openfinance.api.efipay.com.br/v1/oauth/token",
+        accounts: "abrircontas.api.efipay.com.br/v1/oauth/token",
+        bill_payments: "pagarcontas.api.efipay.com.br/v1/oauth/token",
+        statements: "extratos.api.efipay.com.br/v1/oauth/token"
       ]
 
       for {api, route} <- routes do
@@ -156,21 +166,10 @@ defmodule Efi.ClientTest do
         assert {:ok, %Token{access_token: "token-" <> _api}} = Client.authorize(client, api)
 
         assert %Token{access_token: access_token} =
-                 ProcessTokenStore.stored({api, :sandbox, "Client_Id_studio_ana"})
+                 ProcessTokenStore.stored({api, :production, "Client_Id_studio_ana"})
 
         assert access_token == "token-#{api}"
       end
-    end
-
-    test "goes to the production hosts in the production environment" do
-      client = Efi.Test.client(environment: :production, token_store: nil)
-      expect_token_request("pix.api.efipay.com.br/oauth/token", "producao")
-
-      Efi.Test.expect(:get, "pix.api.efipay.com.br/v2/cob/abc", fn conn, _body ->
-        Req.Test.json(conn, %{"txid" => "abc"})
-      end)
-
-      assert {:ok, %{"txid" => "abc"}} = ImmediateCharge.get(client, "abc")
     end
   end
 
@@ -202,6 +201,25 @@ defmodule Efi.ClientTest do
                )
 
       assert {:ok, %{}} = Client.request(client, :pix, :get, "/v2/webhook/chave")
+    end
+
+    test "keeps the token when the app adds its own headers through req_options" do
+      client =
+        Efi.Test.client(
+          req_options: [
+            plug: {Req.Test, Efi.Test.stub()},
+            retry: false,
+            headers: [{"x-request-id", "pedido-1"}]
+          ]
+        )
+
+      Efi.Test.expect(:get, "pix-h.api.efipay.com.br/v2/cob/abc", fn conn, _body ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer token-de-teste"]
+        assert Plug.Conn.get_req_header(conn, "x-request-id") == ["pedido-1"]
+        Req.Test.json(conn, %{"txid" => "abc"})
+      end)
+
+      assert {:ok, %{"txid" => "abc"}} = ImmediateCharge.get(client, "abc")
     end
 
     test "returns nil for an empty body and the raw bytes for a file" do
@@ -320,6 +338,35 @@ defmodule Efi.ClientTest do
       assert {:ok, %{"txid" => "def"}} = ImmediateCharge.create_with_txid(client, "def", %{})
     end
 
+    test "waits as Efí asks before repeating a read, unless the wait is long or unreadable" do
+      client =
+        Efi.Test.client(req_options: [plug: {Req.Test, Efi.Test.stub()}, retry_log_level: false])
+
+      Efi.Test.expect(:get, "pix-h.api.efipay.com.br/v2/cob/abc", fn conn, _body ->
+        conn |> Plug.Conn.put_resp_header("retry-after", "0") |> Plug.Conn.send_resp(429, "")
+      end)
+
+      Efi.Test.expect(:get, "pix-h.api.efipay.com.br/v2/cob/abc", fn conn, _body ->
+        Req.Test.json(conn, %{"txid" => "abc"})
+      end)
+
+      for retry_after <- ["600", "1.5"] do
+        Efi.Test.expect(:get, "pix-h.api.efipay.com.br/v2/cob/abc", fn conn, _body ->
+          conn
+          |> Plug.Conn.put_resp_header("retry-after", retry_after)
+          |> Plug.Conn.send_resp(503, "")
+        end)
+      end
+
+      assert {:ok, %{"txid" => "abc"}} = ImmediateCharge.get(client, "abc")
+
+      assert {:error, %Error{kind: :server, headers: %{"retry-after" => ["600"]}}} =
+               ImmediateCharge.get(client, "abc")
+
+      assert {:error, %Error{kind: :server, headers: %{"retry-after" => ["1.5"]}}} =
+               ImmediateCharge.get(client, "abc")
+    end
+
     test "reports a failure Req could not classify as transport, without repeating it" do
       client = Efi.Test.client(req_options: [adapter: Efi.Test.UnexpectedFailureAdapter])
 
@@ -347,7 +394,34 @@ defmodule Efi.ClientTest do
                Client.request(client, :charges, :get, "/v1/charge/1")
     end
 
-    test "refuses an unknown request option and a path value that was not given" do
+    test "refuses an expired certificate before calling Efí, except for Cobranças" do
+      expired = %{Efi.Test.fake_certificate() | not_after: ~U[2026-01-01 00:00:00Z]}
+      client = Efi.Test.client(certificate: expired)
+
+      Efi.Test.expect(:get, "cobrancas-h.api.efipay.com.br/v1/charge/1", fn conn, _body ->
+        Req.Test.json(conn, %{"code" => 200, "data" => %{"charge_id" => 1}})
+      end)
+
+      assert {:error, %Error{kind: :certificate, reason: :expired}} =
+               ImmediateCharge.get(client, "abc")
+
+      assert {:ok, %{"data" => %{"charge_id" => 1}}} =
+               Client.request(client, :charges, :get, "/v1/charge/1")
+    end
+
+    test "refuses the sandbox for Pagamento de Contas and Extratos, which Efí only runs in production" do
+      client = Efi.Test.client()
+
+      for api <- [:bill_payments, :statements] do
+        assert {:error, %Error{kind: :configuration, reason: {:environment, :unsupported}}} =
+                 Client.request(client, api, :get, "/v1/qualquer")
+
+        assert {:error, %Error{kind: :configuration, reason: {:environment, :unsupported}}} =
+                 Client.authorize(client, api)
+      end
+    end
+
+    test "refuses an unknown request option and a path value that is missing or would change the route" do
       client = Efi.Test.client()
 
       assert_raise ArgumentError, fn ->
@@ -356,6 +430,12 @@ defmodule Efi.ClientTest do
 
       assert_raise ArgumentError, ~r/missing value for :txid/, fn ->
         Client.path("/v2/cob/:txid", id: "abc")
+      end
+
+      for value <- [nil, "", ".", ".."] do
+        assert_raise ArgumentError, ~r/invalid value .* for :txid/, fn ->
+          ImmediateCharge.get(client, value)
+        end
       end
     end
   end

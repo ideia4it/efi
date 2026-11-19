@@ -20,8 +20,13 @@ defmodule Efi.Test.CertificateFixtures do
     openssl!(directory, ~w(req -x509 -newkey ec -pkeyopt ec_paramgen_curve:P-256 -nodes -days 30
       -subj /CN=studio-ana-ec -keyout ec.key -out ec.pem))
 
-    openssl!(directory, ~w(req -x509 -newkey rsa:2048 -nodes -days 30 -subj /CN=localhost
-      -keyout server.key -out server.pem))
+    openssl!(directory, ~w(req -newkey rsa:2048 -nodes -subj /CN=localhost
+      -keyout server.key -out server.csr))
+
+    File.write!(Path.join(directory, "server.ext"), "subjectAltName=DNS:localhost\n")
+
+    openssl!(directory, ~w(x509 -req -in server.csr -CA ca.pem -CAkey ca.key -CAcreateserial
+      -days 30 -extfile server.ext -out server.pem))
 
     export!(directory, "efi.p12", ["-passout", "pass:", "-certfile", "ca.pem"])
     export!(directory, "with_password.p12", ["-passout", "pass:senhação"])

@@ -5,10 +5,10 @@ defmodule Efi.Statements.SftpKeyTest do
 
   setup {Req.Test, :verify_on_exit!}
 
-  @host "extratos-h.api.efipay.com.br"
+  @host "extratos.api.efipay.com.br"
 
   test "generates the SFTP key of the account and returns the private key" do
-    client = Efi.Test.client()
+    client = Efi.Test.client(environment: :production)
 
     Efi.Test.expect(:post, "#{@host}/v1/extrato-cnab/gerar-chaves", fn conn, body ->
       assert body == %{"conta" => 123_456}

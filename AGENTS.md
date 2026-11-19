@@ -16,7 +16,8 @@ mix efi.check_links       # confere se cada link de @doc aponta para uma âncora
 - Uma função pública por rota da Efí, no módulo do recurso. `dev/endpoints.json` é o inventário das rotas
 - Toda função de API devolve `Efi.result()`: `{:ok, corpo}` ou `{:error, %Efi.Error{}}`, e passa por `Efi.Client.request/5`. Nenhum módulo de API fala HTTP sozinho
 - Parâmetros e respostas são mapas com chaves em texto e os nomes da Efí (`"calendario"`, `"valor"`), sem tradução e sem struct por rota
-- Assinatura: `funcao(client, ids_do_caminho..., corpo_ou_params_obrigatorios, opts \\ [])`. Query string opcional vai em `opts[:params]`; query obrigatória é argumento
+- Assinatura: `funcao(client, ids_do_caminho..., corpo_ou_params_obrigatorios, opts \\ [])`. Query string opcional vai em `opts[:params]` e corpo opcional em `opts[:json]`; obrigatórios são argumento. Header que a Efí exige, como a chave de idempotência do Open Finance, também é argumento
+- Nomes de função: `create`, `get`, `list`, `update`, `delete`, `get_<coisa>` para leitura de um recurso derivado (`get_qr_code`) e verbo próprio só quando a rota faz outra coisa (`pay`, `refund`, `cancel`)
 - Caminho sempre por `Efi.Client.path/2` com o modelo exato da doc (`"/v2/pix/:e2eId/devolucao/:id"`), nunca interpolado à mão
 - O `@doc` de toda função de API tem: uma frase do que faz, a linha `` `MÉTODO /caminho` · escopo `x.y` `` (sem escopo, só o método e o caminho) e o link `[Documentação da Efí](https://dev.efipay.com.br/docs/...#ancora)` para a âncora exata da seção
 - Sem `Application`, sem processo e sem `Application.get_env`: tudo passa por `%Efi.Client{}`

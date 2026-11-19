@@ -98,4 +98,12 @@ defmodule Efi.OpenFinance.ImmediatePaymentTest do
               message: "Chave de idempotência repetida para pagamento diferente"
             }} = ImmediatePayment.create(client, @idempotency_key, @payment)
   end
+
+  test "refuses at once an idempotency key passed as an option instead of an argument" do
+    client = Efi.Test.client()
+
+    assert_raise FunctionClauseError, fn ->
+      ImmediatePayment.create(client, @payment, idempotency_key: @idempotency_key)
+    end
+  end
 end

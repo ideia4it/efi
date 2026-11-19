@@ -101,7 +101,7 @@ defmodule MyApp.Payments do
     client = MyApp.Efi.client()
 
     with {:ok, charge} <- create_or_fetch_charge(client, order),
-         {:ok, qr_code} <- Efi.Pix.Location.qr_code(client, charge["loc"]["id"]) do
+         {:ok, qr_code} <- Efi.Pix.Location.get_qr_code(client, charge["loc"]["id"]) do
       {:ok, %{copy_paste: charge["pixCopiaECola"], image: qr_code["imagemQrcode"]}}
     end
   end

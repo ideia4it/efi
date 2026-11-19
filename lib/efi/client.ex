@@ -25,19 +25,23 @@ defmodule Efi.Client do
   | Cobranças | `:charges` | `cobrancas.api.efipay.com.br` | `cobrancas-h.api.efipay.com.br` | não |
   | Open Finance | `:open_finance` | `openfinance.api.efipay.com.br` | `openfinance-h.api.efipay.com.br` | sim |
   | Abertura de Contas | `:accounts` | `abrircontas.api.efipay.com.br` | `abrircontas-h.api.efipay.com.br` | sim |
-  | Pagamento de Contas | `:bill_payments` | `pagarcontas.api.efipay.com.br` | `pagarcontas-h.api.efipay.com.br` | sim |
-  | Extratos | `:statements` | `extratos.api.efipay.com.br` | `extratos-h.api.efipay.com.br` | sim |
+  | Pagamento de Contas | `:bill_payments` | `pagarcontas.api.efipay.com.br` | não existe | sim |
+  | Extratos | `:statements` | `extratos.api.efipay.com.br` | não existe | sim |
 
   Uma aplicação Efí tem um par de credenciais para produção e outro para homologação, e cada
-  ambiente tem o próprio certificado.
+  ambiente tem o próprio certificado. Pagamento de Contas e Extratos só rodam em produção: com
+  um cliente `:sandbox`, as chamadas delas voltam
+  `%Efi.Error{kind: :configuration, reason: {:environment, :unsupported}}` sem sair da máquina.
 
   ## Token de acesso
 
   Cada API emite o próprio token OAuth2, pedido com HTTP Basic (`client_id:client_secret`) e,
-  nas APIs com mTLS, com o certificado. Sem `token_store`, cada chamada pede um token novo
-  antes da requisição. Com um `Efi.TokenStore`, o token é reaproveitado até faltar um minuto
-  para vencer. Se a Efí recusar com 401 um token que veio do store (revogado antes da hora), a
-  chamada pede um token novo e repete uma única vez.
+  nas APIs com mTLS, com o certificado. Um certificado vencido volta como
+  `%Efi.Error{kind: :certificate, reason: :expired}` antes de qualquer pedido. Sem
+  `token_store`, cada chamada pede um token novo antes da requisição. Com um `Efi.TokenStore`,
+  o token é reaproveitado até faltar um minuto para vencer. Se a Efí recusar com 401 um token
+  que veio do store (revogado antes da hora), a chamada pede um token novo e repete uma única
+  vez.
 
   ## Reenvio
 
@@ -47,12 +51,24 @@ defmodule Efi.Client do
   ambígua, porque a Efí pode já ter criado a cobrança ou enviado o Pix, e repetir duplicaria a
   operação. Nesses casos o erro volta para o chamador conferir antes de tentar de novo.
 
+  São até 3 repetições, com espera crescente de 1, 2 e 4 segundos. Num 429 ou 503 com
+  `retry-after`, a espera é a que a Efí pede, até 5 segundos; acima disso o erro volta na hora,
+  com o header em `error.headers`, para o app decidir quando tentar. No pior caso, um `GET` que
+  sempre estoura o tempo leva 4 vezes o `receive_timeout` mais uns 7 segundos. Para encurtar,
+  passe `req_options: [max_retries: 1]`, ou `retry: false` para não repetir nada.
+
+  ## Conexões
+
+  O `Req` mantém um pool de conexões para cada certificado, nomeado por um átomo. O pool fecha
+  depois de 5 minutos parado, mas a estrutura dele continua viva: um parceiro com milhares de
+  contas ativas fica com um átomo e alguns processos parados por certificado.
+
   ## Opções de cada chamada
 
   Toda função das APIs aceita, no último argumento, as opções de requisição:
 
-    * `:idempotency_key` - enviada no header `x-idempotency-key`. As rotas de pagamento do Open
-      Finance exigem;
+    * `:idempotency_key` - enviada no header `x-idempotency-key`. As rotas do Open Finance que
+      exigem a chave a recebem como argumento, então esta opção só serve para outra rota;
     * `:skip_mtls_checking` - com `true`, envia `x-skip-mtls-checking: true` ao cadastrar um
       webhook. Use quando o servidor do webhook não valida o certificado da Efí, como atrás de
       um proxy que encerra o TLS (Fly.io, Heroku, Render), e proteja a URL de outra forma;
@@ -64,6 +80,7 @@ defmodule Efi.Client do
   alias Efi.Error
   alias Efi.Token
 
+  @derive {Inspect, except: [:client_secret, :partner_token]}
   @enforce_keys [:client_id, :client_secret, :environment]
   defstruct [
     :client_id,
@@ -90,16 +107,27 @@ defmodule Efi.Client do
           req_options: keyword()
         }
 
+  # O SDK oficial em Node lista `pagarcontas-h` e `extratos-h`, mas esses nomes não resolvem
+  # no DNS e a doc da Efí só cita produção para as duas APIs.
   @hosts %{
-    pix: {"https://pix.api.efipay.com.br", "https://pix-h.api.efipay.com.br"},
-    charges: {"https://cobrancas.api.efipay.com.br", "https://cobrancas-h.api.efipay.com.br"},
-    open_finance:
-      {"https://openfinance.api.efipay.com.br", "https://openfinance-h.api.efipay.com.br"},
-    accounts:
-      {"https://abrircontas.api.efipay.com.br", "https://abrircontas-h.api.efipay.com.br"},
-    bill_payments:
-      {"https://pagarcontas.api.efipay.com.br", "https://pagarcontas-h.api.efipay.com.br"},
-    statements: {"https://extratos.api.efipay.com.br", "https://extratos-h.api.efipay.com.br"}
+    pix: %{
+      production: "https://pix.api.efipay.com.br",
+      sandbox: "https://pix-h.api.efipay.com.br"
+    },
+    charges: %{
+      production: "https://cobrancas.api.efipay.com.br",
+      sandbox: "https://cobrancas-h.api.efipay.com.br"
+    },
+    open_finance: %{
+      production: "https://openfinance.api.efipay.com.br",
+      sandbox: "https://openfinance-h.api.efipay.com.br"
+    },
+    accounts: %{
+      production: "https://abrircontas.api.efipay.com.br",
+      sandbox: "https://abrircontas-h.api.efipay.com.br"
+    },
+    bill_payments: %{production: "https://pagarcontas.api.efipay.com.br"},
+    statements: %{production: "https://extratos.api.efipay.com.br"}
   }
 
   @token_paths %{
@@ -125,6 +153,7 @@ defmodule Efi.Client do
   @transient_statuses [408, 429, 500, 502, 503, 504]
   @never_sent_reasons [:nxdomain, :econnrefused, :ehostunreach, :enetunreach]
   @transient_reasons [:timeout, :closed | @never_sent_reasons]
+  @max_retry_after_seconds 5
 
   @doc """
   Monta o cliente.
@@ -137,7 +166,8 @@ defmodule Efi.Client do
     * `:token_store` - um módulo que implementa `Efi.TokenStore`;
     * `:partner_token` - o identificador de parceiro Efí, enviado no header `partner-token`;
     * `:receive_timeout` - em milissegundos, padrão `30_000`;
-    * `:req_options` - mesclado por último nas opções do `Req`, vence os padrões.
+    * `:req_options` - mesclado por último nas opções do `Req`, vence os padrões. Headers e
+      `params` daqui se somam aos da biblioteca em vez de trocá-los.
 
   A falta de uma opção obrigatória ou um valor inválido volta como
   `%Efi.Error{kind: :configuration, reason: {opção, :required | :invalid}}`.
@@ -159,7 +189,7 @@ defmodule Efi.Client do
   """
   @spec authorize(t(), api()) :: {:ok, Token.t()} | {:error, Error.t()}
   def authorize(%__MODULE__{} = client, api) do
-    with :ok <- require_certificate(client, api),
+    with :ok <- check_access(client, api),
          {:ok, token} <- request_token(client, api) do
       store_token(client, api, token)
       {:ok, token}
@@ -178,7 +208,7 @@ defmodule Efi.Client do
   def request(%__MODULE__{} = client, api, method, path, opts \\ []) do
     opts = Keyword.validate!(opts, @request_options)
 
-    with :ok <- require_certificate(client, api),
+    with :ok <- check_access(client, api),
          {:ok, token, source} <- current_token(client, api) do
       client
       |> send_request(api, method, path, token, opts)
@@ -188,6 +218,9 @@ defmodule Efi.Client do
 
   @doc """
   Monta o caminho de uma rota a partir do modelo da documentação, codificando cada valor.
+
+  Um valor ausente, `nil`, vazio, `"."` ou `".."` levanta `ArgumentError`: com ele, o caminho
+  apontaria para outra rota (`GET /v2/cob/` é a lista de cobranças, não uma cobrança).
 
       iex> Efi.Client.path("/v2/pix/:e2eId/devolucao/:id", e2eId: "E123", id: "dev 1")
       "/v2/pix/E123/devolucao/dev%201"
@@ -201,8 +234,14 @@ defmodule Efi.Client do
 
     Regex.replace(~r/:([A-Za-z_][A-Za-z0-9_]*)/, template, fn _match, name ->
       case Map.fetch(values, name) do
-        {:ok, value} -> URI.encode(to_string(value), &path_character?/1)
-        :error -> raise ArgumentError, "missing value for :#{name} in #{template}"
+        {:ok, value} when value in [nil, "", ".", ".."] ->
+          raise ArgumentError, "invalid value #{inspect(value)} for :#{name} in #{template}"
+
+        {:ok, value} ->
+          URI.encode(to_string(value), &path_character?/1)
+
+        :error ->
+          raise ArgumentError, "missing value for :#{name} in #{template}"
       end
     end)
   end
@@ -211,13 +250,6 @@ defmodule Efi.Client do
   # identificadores de pagamento do Open Finance são URNs (`urn:efi:...`). A barra é codificada,
   # para um valor nunca virar outro segmento.
   defp path_character?(character), do: URI.char_unreserved?(character) or character in ~c":@"
-
-  @doc false
-  @spec base_url(t(), api()) :: String.t()
-  def base_url(%__MODULE__{environment: environment}, api) do
-    {production, sandbox} = Map.fetch!(@hosts, api)
-    if environment == :production, do: production, else: sandbox
-  end
 
   defp check_required(opts) do
     case Enum.find([:client_id, :client_secret, :environment], &blank?(opts[&1])) do
@@ -235,8 +267,24 @@ defmodule Efi.Client do
   defp check_certificate(%Certificate{}), do: :ok
   defp check_certificate(_certificate), do: configuration_error({:certificate, :invalid})
 
+  defp check_access(client, api) do
+    with :ok <- require_environment(client, api), do: require_certificate(client, api)
+  end
+
+  defp require_environment(%__MODULE__{environment: environment}, api) do
+    if Map.has_key?(Map.fetch!(@hosts, api), environment),
+      do: :ok,
+      else: configuration_error({:environment, :unsupported})
+  end
+
   defp require_certificate(_client, api) when api in @apis_without_mtls, do: :ok
-  defp require_certificate(%__MODULE__{certificate: %Certificate{}}, _api), do: :ok
+
+  defp require_certificate(%__MODULE__{certificate: %Certificate{} = certificate}, _api) do
+    if Certificate.expired?(certificate, DateTime.utc_now()),
+      do: {:error, %Error{kind: :certificate, reason: :expired}},
+      else: :ok
+  end
+
   defp require_certificate(_client, _api), do: configuration_error({:certificate, :required})
 
   defp configuration_error(reason), do: {:error, %Error{kind: :configuration, reason: reason}}
@@ -328,7 +376,7 @@ defmodule Efi.Client do
 
   defp build_request(request_options, client, api, receive_timeout) do
     [
-      base_url: base_url(client, api),
+      base_url: @hosts |> Map.fetch!(api) |> Map.fetch!(client.environment),
       receive_timeout: receive_timeout,
       decode_body: false,
       redirect: false,
@@ -336,8 +384,8 @@ defmodule Efi.Client do
     ]
     |> Keyword.merge(connection_options(client))
     |> Keyword.merge(request_options)
-    |> Keyword.merge(client.req_options)
     |> Req.new()
+    |> Req.merge(client.req_options)
   end
 
   defp connection_options(%__MODULE__{certificate: nil}), do: []
@@ -378,12 +426,31 @@ defmodule Efi.Client do
     |> Enum.any?(&String.contains?(&1, "json"))
   end
 
-  defp retry?(%Req.Request{method: :get}, outcome), do: transient?(outcome)
+  defp retry?(%Req.Request{method: :get}, outcome),
+    do: transient?(outcome) and short_wait?(outcome)
+
   defp retry?(%Req.Request{}, outcome), do: never_sent?(outcome)
 
   defp transient?(%Req.Response{status: status}), do: status in @transient_statuses
   defp transient?(%Req.TransportError{reason: reason}), do: reason in @transient_reasons
   defp transient?(_outcome), do: false
+
+  # O Req dorme o `retry-after` inteiro antes de repetir, sem teto, e quebra com um valor
+  # decimal. Uma espera longa ou ilegível volta para o chamador decidir.
+  defp short_wait?(%Req.Response{} = response) do
+    case Req.Response.get_header(response, "retry-after") do
+      [] ->
+        true
+
+      values ->
+        match?(
+          [{wait, ""}] when wait <= @max_retry_after_seconds,
+          Enum.map(values, &Integer.parse/1)
+        )
+    end
+  end
+
+  defp short_wait?(_exception), do: true
 
   defp never_sent?(%Req.TransportError{reason: reason}), do: reason in @never_sent_reasons
   defp never_sent?(_outcome), do: false

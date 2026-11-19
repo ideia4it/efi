@@ -5,11 +5,11 @@ defmodule Efi.BillPayments.PaymentTest do
 
   setup {Req.Test, :verify_on_exit!}
 
-  @host "pagarcontas-h.api.efipay.com.br"
+  @host "pagarcontas.api.efipay.com.br"
   @barcode "36490000000000000000000000000000000000000000"
 
   test "checks a bill's barcode, pays it, follows the payment and sees it in the period summary" do
-    client = Efi.Test.client()
+    client = Efi.Test.client(environment: :production)
 
     Efi.Test.expect(:get, "#{@host}/v1/codBarras/#{@barcode}", fn conn, _body ->
       Req.Test.json(conn, %{
@@ -49,7 +49,7 @@ defmodule Efi.BillPayments.PaymentTest do
              Payment.get_barcode(client, @barcode)
 
     assert {:ok, %{"idPagamento" => payment_id, "status" => "AGENDADO"}} =
-             Payment.create(client, @barcode, %{
+             Payment.pay(client, @barcode, %{
                "valor" => bill["valores"]["final"],
                "dataPagamento" => "2026-11-19",
                "descricao" => "Conta de luz do Studio Ana"
@@ -58,11 +58,14 @@ defmodule Efi.BillPayments.PaymentTest do
     assert {:ok, %{"status" => "LIQUIDADO"}} = Payment.get(client, payment_id)
 
     assert {:ok, %{"solicitacoes" => %{"total" => 1, "sucesso" => 1}}} =
-             Payment.summary(client, %{"dataInicio" => "2026-11-01", "dataFim" => "2026-11-30"})
+             Payment.get_summary(client, %{
+               "dataInicio" => "2026-11-01",
+               "dataFim" => "2026-11-30"
+             })
   end
 
   test "reports a barcode the Efí cannot find as a validation error" do
-    client = Efi.Test.client()
+    client = Efi.Test.client(environment: :production)
 
     Efi.Test.expect(:get, "#{@host}/v1/codBarras/#{@barcode}", fn conn, _body ->
       conn

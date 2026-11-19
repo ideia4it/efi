@@ -59,7 +59,8 @@ defmodule Efi.OpenFinance.BiometricPayment do
   [Documentação da Efí](https://dev.efipay.com.br/docs/api-open-finance/pagamentos-por-biometria#criar-vínculo)
   """
   @spec create_enrollment(Client.t(), String.t(), map(), keyword()) :: Efi.result()
-  def create_enrollment(%Client{} = client, idempotency_key, enrollment, opts \\ []) do
+  def create_enrollment(%Client{} = client, idempotency_key, enrollment, opts \\ [])
+      when is_binary(idempotency_key) do
     opts = Keyword.merge(opts, json: enrollment, idempotency_key: idempotency_key)
     Client.request(client, :open_finance, :post, "/v1/pagamentos-biometria/vinculos", opts)
   end
@@ -87,7 +88,8 @@ defmodule Efi.OpenFinance.BiometricPayment do
   [Documentação da Efí](https://dev.efipay.com.br/docs/api-open-finance/pagamentos-por-biometria#revogar-vínculo)
   """
   @spec revoke_enrollment(Client.t(), String.t(), map(), keyword()) :: Efi.result()
-  def revoke_enrollment(%Client{} = client, idempotency_key, revocation, opts \\ []) do
+  def revoke_enrollment(%Client{} = client, idempotency_key, revocation, opts \\ [])
+      when is_binary(idempotency_key) do
     opts = Keyword.merge(opts, json: revocation, idempotency_key: idempotency_key)
     Client.request(client, :open_finance, :patch, "/v1/pagamentos-biometria/vinculos", opts)
   end
@@ -101,7 +103,8 @@ defmodule Efi.OpenFinance.BiometricPayment do
   [Documentação da Efí](https://dev.efipay.com.br/docs/api-open-finance/pagamentos-por-biometria#criar-pagamento-via-jornada-sem-redirecionamento)
   """
   @spec create(Client.t(), String.t(), map(), keyword()) :: Efi.result()
-  def create(%Client{} = client, idempotency_key, payment, opts \\ []) do
+  def create(%Client{} = client, idempotency_key, payment, opts \\ [])
+      when is_binary(idempotency_key) do
     opts = Keyword.merge(opts, json: payment, idempotency_key: idempotency_key)
     Client.request(client, :open_finance, :post, "/v1/pagamentos-biometria/pix", opts)
   end

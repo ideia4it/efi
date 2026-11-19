@@ -1,7 +1,7 @@
 defmodule Efi.BillPayments.Webhook do
   @moduledoc """
   Webhook do Pagamento de Contas: a URL que a Efí chama a cada mudança de status de um
-  pagamento pedido em `Efi.BillPayments.Payment.create/4`.
+  pagamento pedido em `Efi.BillPayments.Payment.pay/4`.
 
       {:ok, _webhook} =
         Efi.BillPayments.Webhook.configure(client, %{

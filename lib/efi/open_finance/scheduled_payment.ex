@@ -38,7 +38,8 @@ defmodule Efi.OpenFinance.ScheduledPayment do
   [Documentação da Efí](https://dev.efipay.com.br/docs/api-open-finance/pagamentos-agendados#solicitar-iniciação-de-pix-agendado-via-open-finance)
   """
   @spec create(Client.t(), String.t(), map(), keyword()) :: Efi.result()
-  def create(%Client{} = client, idempotency_key, payment, opts \\ []) do
+  def create(%Client{} = client, idempotency_key, payment, opts \\ [])
+      when is_binary(idempotency_key) do
     opts = Keyword.merge(opts, json: payment, idempotency_key: idempotency_key)
     Client.request(client, :open_finance, :post, "/v1/pagamentos-agendados/pix", opts)
   end

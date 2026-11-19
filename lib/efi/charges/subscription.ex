@@ -8,7 +8,7 @@ defmodule Efi.Charges.Subscription do
     * `create_one_step/4`: assinatura e forma de pagamento juntas;
     * `create/4` e depois `set_payment_method/4`: a assinatura nasce `new` e fica `active`
       quando a forma de pagamento é definida;
-    * `create_with_payment_link/4`: o cliente escolhe como pagar na tela da Efí.
+    * `create_one_step_link/4`: o cliente escolhe como pagar na tela da Efí.
 
   ```elixir
   {:ok, %{"data" => %{"subscription_id" => subscription_id}}} =
@@ -90,9 +90,9 @@ defmodule Efi.Charges.Subscription do
 
   [Documentação da Efí](https://dev.efipay.com.br/docs/api-cobrancas/assinatura#associar-plano-ao-link-de-pagamento)
   """
-  @spec create_with_payment_link(Client.t(), Efi.Charges.Plan.plan_id(), map(), keyword()) ::
+  @spec create_one_step_link(Client.t(), Efi.Charges.Plan.plan_id(), map(), keyword()) ::
           Efi.result()
-  def create_with_payment_link(%Client{} = client, plan_id, body, opts \\ []) do
+  def create_one_step_link(%Client{} = client, plan_id, body, opts \\ []) do
     path = Client.path("/v1/plan/:id/subscription/one-step/link", id: plan_id)
     Client.request(client, :charges, :post, path, Keyword.put(opts, :json, body))
   end
@@ -179,7 +179,7 @@ defmodule Efi.Charges.Subscription do
 
   @doc """
   Reenvia para o e-mail informado o link de pagamento de uma assinatura criada com
-  `create_with_payment_link/4`. Recebe o `charge_id` do link, não o `subscription_id`.
+  `create_one_step_link/4`. Recebe o `charge_id` do link, não o `subscription_id`.
 
   `POST /v1/charge/:id/subscription/resend`
 

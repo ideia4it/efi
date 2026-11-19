@@ -17,8 +17,8 @@ defmodule Efi.Error do
   | `:http` | outro status fora de 2xx |
   | `:authentication` | o pedido do token de acesso falhou |
   | `:transport` | a requisição não teve resposta: timeout, conexão recusada, DNS |
-  | `:certificate` | o certificado não abriu (veja `Efi.Certificate`) |
-  | `:configuration` | falta algo no `%Efi.Client{}` para chamar aquela API |
+  | `:certificate` | o certificado não abriu (veja `Efi.Certificate`) ou venceu (`reason: :expired`) |
+  | `:configuration` | falta algo no `%Efi.Client{}` para chamar aquela API, ou a API não existe no ambiente dele |
 
   `name` e `message` vêm do corpo da resposta. Cada API da Efí devolve erro num formato, e todos
   são lidos aqui: `nome`/`mensagem` (Pix, Open Finance, Abertura de Contas), o padrão do Banco

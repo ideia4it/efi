@@ -24,6 +24,18 @@ defmodule Efi.Dev.Documentation do
         do: {{module, name, arity}, doc_text(doc)}
   end
 
+  @doc "Nomes dos argumentos de uma função, lidos da assinatura guardada na documentação."
+  def parameter_names(module, name, arity) do
+    {:docs_v1, _anno, :elixir, _format, _moduledoc, _metadata, docs} = Code.fetch_docs(module)
+    {_key, _anno, [signature], _doc, _metadata} = List.keyfind(docs, {:function, name, arity}, 0)
+    {^name, _meta, arguments} = Code.string_to_quoted!(signature)
+
+    Enum.map(arguments, fn
+      {:\\, _meta, [{argument, _argument_meta, _context}, _default]} -> argument
+      {argument, _meta, _context} -> argument
+    end)
+  end
+
   def all_docs do
     {:ok, modules} = :application.get_key(:efi, :modules)
     Enum.flat_map(modules, &module_docs/1)

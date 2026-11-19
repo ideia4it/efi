@@ -7,14 +7,14 @@ defmodule Efi.OpenFinance.Config do
   sem `webhookURL`, o app só descobre o resultado consultando a lista de pagamentos.
 
       {:ok, _settings} =
-        Efi.OpenFinance.Config.put(client, %{
+        Efi.OpenFinance.Config.update(client, %{
           "redirectURL" => "https://app.example.com/open-finance/retorno",
           "webhookURL" => "https://app.example.com/open-finance/webhook",
           "webhookSecurity" => %{"type" => "hmac", "hash" => "segredo-do-studio-ana"},
           "processPayment" => "async"
         })
 
-  `put/3` grava a configuração inteira: um campo que fica de fora volta ao padrão da Efí, então
+  `update/3` grava a configuração inteira: um campo que fica de fora volta ao padrão da Efí, então
   mande todos os campos a cada chamada.
 
     * `"webhookSecurity"` - `%{"type" => "mtls"}` (padrão) exige que o servidor do webhook
@@ -42,8 +42,8 @@ defmodule Efi.OpenFinance.Config do
 
   [Documentação da Efí](https://dev.efipay.com.br/docs/api-open-finance/configuracoes-de-aplicacao#configurar-urls-da-aplicação)
   """
-  @spec put(Client.t(), map(), keyword()) :: Efi.result()
-  def put(%Client{} = client, settings, opts \\ []) do
+  @spec update(Client.t(), map(), keyword()) :: Efi.result()
+  def update(%Client{} = client, settings, opts \\ []) do
     Client.request(client, :open_finance, :put, "/v1/config", Keyword.put(opts, :json, settings))
   end
 

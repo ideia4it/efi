@@ -1,19 +1,23 @@
 defmodule Efi.CertificateTest do
-  use ExUnit.Case, async: true
+  # Síncrono: o teste de mTLS troca o repositório global de CAs confiáveis do Erlang.
+  use ExUnit.Case, async: false
 
   alias Efi.Certificate
+  alias Efi.Client
   alias Efi.Error
+  alias Efi.Pix.ImmediateCharge
   alias Efi.Test.CertificateFixtures
+  alias Efi.Test.MtlsServer
 
   @moduletag :tmp_dir
+  @moduletag :capture_log
 
   setup %{tmp_dir: tmp_dir} do
     {:ok, fixtures: CertificateFixtures.generate!(tmp_dir)}
   end
 
-  test "opens Efí's passwordless .p12 and authenticates with it in a real mTLS handshake", %{
-    fixtures: fixtures
-  } do
+  test "opens Efí's passwordless .p12 and calls the API with it over mTLS, trusting only a known server",
+       %{fixtures: fixtures} do
     assert {:ok, %Certificate{} = certificate} = Certificate.from_p12(fixtures.p12)
 
     assert certificate.certificate == CertificateFixtures.der_certificate(fixtures.app_pem)
@@ -21,9 +25,28 @@ defmodule Efi.CertificateTest do
     assert DateTime.compare(certificate.not_before, certificate.not_after) == :lt
     refute Certificate.expired?(certificate, DateTime.utc_now())
     assert Certificate.expired?(certificate, DateTime.add(certificate.not_after, 1, :second))
-
-    assert handshake_peer_certificate(fixtures.directory, certificate) == certificate.certificate
     refute inspect(certificate) =~ "PrivateKeyInfo"
+
+    port = MtlsServer.start!(fixtures.directory, self())
+
+    {:ok, client} =
+      Client.new(
+        client_id: "Client_Id_studio_ana",
+        client_secret: "Client_Secret_studio_ana",
+        environment: :sandbox,
+        certificate: certificate,
+        req_options: [base_url: "https://localhost:#{port}", retry: false]
+      )
+
+    assert {:error, %Error{kind: :transport}} = ImmediateCharge.get(client, "abc")
+
+    on_exit(fn -> :public_key.cacerts_clear() end)
+    :ok = :public_key.cacerts_load(Path.join(fixtures.directory, "ca.pem"))
+
+    assert {:ok, %{"txid" => "abc"}} = ImmediateCharge.get(client, "abc")
+    assert_receive {:mtls_request, "POST /oauth/token " <> _version, application_certificate}
+    assert_receive {:mtls_request, "GET /v2/cob/abc " <> _version, ^application_certificate}
+    assert application_certificate == certificate.certificate
   end
 
   test "opens a .p12 whose password has accents and refuses the wrong password", %{
@@ -102,40 +125,5 @@ defmodule Efi.CertificateTest do
   test "gives up on an openssl that does not answer in time", %{fixtures: fixtures} do
     assert {:error, %Error{kind: :certificate, reason: :timeout}} =
              Certificate.from_p12(fixtures.p12, "", timeout: 0)
-  end
-
-  defp handshake_peer_certificate(directory, certificate) do
-    {:ok, listen_socket} =
-      :ssl.listen(0,
-        certfile: Path.join(directory, "server.pem") |> String.to_charlist(),
-        keyfile: Path.join(directory, "server.key") |> String.to_charlist(),
-        cacertfile: Path.join(directory, "ca.pem") |> String.to_charlist(),
-        verify: :verify_peer,
-        fail_if_no_peer_cert: true,
-        active: false
-      )
-
-    {:ok, {_address, port}} = :ssl.sockname(listen_socket)
-
-    server =
-      Task.async(fn ->
-        {:ok, socket} = :ssl.transport_accept(listen_socket, 5_000)
-        {:ok, socket} = :ssl.handshake(socket, 5_000)
-        {:ok, peer_certificate} = :ssl.peercert(socket)
-        peer_certificate
-      end)
-
-    {:ok, client_socket} =
-      :ssl.connect(
-        ~c"localhost",
-        port,
-        Certificate.transport_options(certificate) ++ [verify: :verify_none, active: false],
-        5_000
-      )
-
-    peer_certificate = Task.await(server)
-    :ssl.close(client_socket)
-    :ssl.close(listen_socket)
-    peer_certificate
   end
 end

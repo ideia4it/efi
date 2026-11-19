@@ -100,9 +100,11 @@ O cliente recebe um link pelo meio escolhido e autoriza. Se ele já tem conta Ef
 criar uma aplicação na conta atual ou uma conta secundária. Se recusar, um novo pedido para o
 mesmo cliente só pode ser feito depois de 2 dias corridos.
 
-Os escopos de envio de Pix e pagamento de boleto (`pix.send`, `gn.pix.send.read`,
-`gn.qrcodes.pay` e os de código de barras) não são liberados quando o cliente já tem conta:
-a plataforma recebe em nome dele, mas não movimenta o saldo.
+Quando o cliente já tem conta e escolhe criar uma aplicação nela, a Efí não libera os escopos
+de envio de Pix e de pagamento de boleto (`pix.send`, `gn.pix.send.read`, `gn.qrcodes.pay`,
+`gn.qrcodes.read`, `gn.barcode.read`, `gn.barcode.pay.write` e `gn.barcode.pay.read`): a
+plataforma recebe em nome dele, mas não movimenta o saldo. Na conta secundária, valem os
+escopos pedidos em `escoposIntegrados`.
 
 ## 4. Quando a conta abrir: credenciais e certificado
 
@@ -130,6 +132,11 @@ certificado uma vez e guarde o `.p12` cifrado no banco, junto com as credenciais
 ```
 
 O `token_store` separa os tokens pelo `client_id`, então um store serve para todas as contas.
+
+Cada certificado ganha um pool de conexões próprio no `Req`, nomeado por um átomo. O pool
+fecha depois de 5 minutos parado, mas a estrutura dele fica viva até o app reiniciar: com
+milhares de contas ativas, são milhares de átomos e alguns processos parados por conta. Para
+poucas centenas de contas isso não pesa; acima disso, acompanhe a contagem de átomos.
 
 ## 5. Cobrar e repassar a parte da plataforma
 

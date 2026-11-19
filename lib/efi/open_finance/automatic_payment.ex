@@ -101,7 +101,8 @@ defmodule Efi.OpenFinance.AutomaticPayment do
   [Documentação da Efí](https://dev.efipay.com.br/docs/api-open-finance/pagamentos-automaticos#editar-uma-adesão)
   """
   @spec update_enrollment(Client.t(), String.t(), map(), keyword()) :: Efi.result()
-  def update_enrollment(%Client{} = client, idempotency_key, changes, opts \\ []) do
+  def update_enrollment(%Client{} = client, idempotency_key, changes, opts \\ [])
+      when is_binary(idempotency_key) do
     opts = Keyword.merge(opts, json: changes, idempotency_key: idempotency_key)
     Client.request(client, :open_finance, :patch, "/v1/pagamentos-automaticos/adesao", opts)
   end
@@ -116,7 +117,8 @@ defmodule Efi.OpenFinance.AutomaticPayment do
   [Documentação da Efí](https://dev.efipay.com.br/docs/api-open-finance/pagamentos-automaticos#solicitar-criação-de-um-pagamento-automatico)
   """
   @spec create(Client.t(), String.t(), map(), keyword()) :: Efi.result()
-  def create(%Client{} = client, idempotency_key, payment, opts \\ []) do
+  def create(%Client{} = client, idempotency_key, payment, opts \\ [])
+      when is_binary(idempotency_key) do
     opts = Keyword.merge(opts, json: payment, idempotency_key: idempotency_key)
     Client.request(client, :open_finance, :post, "/v1/pagamentos-automaticos/pix", opts)
   end

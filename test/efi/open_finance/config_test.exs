@@ -28,7 +28,7 @@ defmodule Efi.OpenFinance.ConfigTest do
       Req.Test.json(conn, Map.put(@settings, "generateTxIdForInic", false))
     end)
 
-    assert {:ok, @settings} = Config.put(client, @settings)
+    assert {:ok, @settings} = Config.update(client, @settings)
 
     assert {:ok, %{"webhookURL" => "https://app.example.com/open-finance/webhook"}} =
              Config.get(client)

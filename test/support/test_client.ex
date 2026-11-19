@@ -35,7 +35,7 @@ defmodule Efi.Test do
       key: {:PrivateKeyInfo, "chave"},
       chain: [],
       not_before: ~U[2026-01-01 00:00:00Z],
-      not_after: ~U[2027-01-01 00:00:00Z]
+      not_after: ~U[2099-01-01 00:00:00Z]
     }
   end
 

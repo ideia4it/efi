@@ -149,7 +149,7 @@ defmodule Efi.Charges.SubscriptionTest do
     end)
 
     assert {:ok, %{"data" => %{"charge" => %{"id" => charge_id}, "payment_url" => _url}}} =
-             Subscription.create_with_payment_link(client, 7007, %{
+             Subscription.create_one_step_link(client, 7007, %{
                "items" => [%{"name" => "Clube de escova", "value" => 9_900, "amount" => 1}],
                "settings" => %{"payment_method" => "all", "expire_at" => "2026-12-20"}
              })

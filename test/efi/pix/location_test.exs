@@ -53,7 +53,7 @@ defmodule Efi.Pix.LocationTest do
     assert {:ok, %{"txid" => @txid}} = Location.get(client, 66)
 
     assert {:ok, %{"imagemQrcode" => "data:image/svg+xml;base64," <> _image}} =
-             Location.qr_code(client, 66)
+             Location.get_qr_code(client, 66)
 
     assert {:ok, unlinked} = Location.unlink_txid(client, 66)
     refute Map.has_key?(unlinked, "txid")

@@ -21,7 +21,7 @@ defmodule Efi.Pix.ImmediateCharge do
   Em homologação, cobranças de R$ 0,01 a R$ 10,00 são pagas sozinhas e disparam o webhook;
   acima disso ficam ativas sem pagamento.
 
-  Para o QR Code em imagem, use `Efi.Pix.Location.qr_code/3` com o `loc.id` da resposta.
+  Para o QR Code em imagem, use `Efi.Pix.Location.get_qr_code/3` com o `loc.id` da resposta.
   """
 
   alias Efi.Client

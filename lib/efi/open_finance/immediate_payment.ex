@@ -5,7 +5,7 @@ defmodule Efi.OpenFinance.ImmediatePayment do
 
   ## Fluxo
 
-  1. Configure uma vez o `redirectURL` e o `webhookURL` com `Efi.OpenFinance.Config.put/3`.
+  1. Configure uma vez o `redirectURL` e o `webhookURL` com `Efi.OpenFinance.Config.update/3`.
   2. O pagador escolhe o banco dele (`Efi.OpenFinance.Participant.list/2`) e informa o CPF.
   3. `create/4` registra o pagamento e devolve `identificadorPagamento` e `redirectURI`. Guarde
      o identificador junto do pedido e leve o pagador ao `redirectURI` (um botão "Pagar pelo
@@ -47,9 +47,11 @@ defmodule Efi.OpenFinance.ImmediatePayment do
   só uma; um novo pedido com uma chave já usada volta como
   `%Efi.Error{kind: :conflict, name: "conflito_chave_idempotencia"}`.
 
-  Gere a chave antes da primeira tentativa e guarde junto do pedido. Depois de um timeout,
-  repita com a mesma chave: se vier o conflito, a Efí já tinha recebido o pagamento, e ele
-  aparece em `list/3` com o `idProprio` que você mandou.
+  Gere a chave antes da primeira tentativa e guarde junto do pedido, com o corpo exato que foi
+  enviado. Depois de um timeout, repita com a mesma chave e o mesmo corpo. O conflito, sozinho,
+  não diz se o pagamento existe: a Efí descreve o erro como chave repetida "para pagamento
+  diferente", então ele também aparece quando o corpo mudou entre as tentativas. Confira em
+  `list/3`, no período do pedido, se há um pagamento com o `idProprio` que você mandou.
 
   ## Webhook
 
@@ -88,7 +90,8 @@ defmodule Efi.OpenFinance.ImmediatePayment do
   [Documentação da Efí](https://dev.efipay.com.br/docs/api-open-finance/pagamentos-imediatos#solicitar-iniciação-de-pix-via-open-finance)
   """
   @spec create(Client.t(), String.t(), map(), keyword()) :: Efi.result()
-  def create(%Client{} = client, idempotency_key, payment, opts \\ []) do
+  def create(%Client{} = client, idempotency_key, payment, opts \\ [])
+      when is_binary(idempotency_key) do
     opts = Keyword.merge(opts, json: payment, idempotency_key: idempotency_key)
     Client.request(client, :open_finance, :post, "/v1/pagamentos/pix", opts)
   end

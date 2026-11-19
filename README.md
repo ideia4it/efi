@@ -63,8 +63,8 @@ Requer Elixir 1.15 ou mais novo e o executável `openssl` no servidor, para abri
 | Cobranças | `Efi.Charges.*` | suíte pronta, ainda não rodada |
 | Open Finance | `Efi.OpenFinance.*` | ainda não conferida |
 | Abertura de Contas (beta na Efí) | `Efi.Accounts.*` | ainda não conferida |
-| Pagamento de Contas | `Efi.BillPayments.*` | ainda não conferida |
-| Extratos | `Efi.Statements.*` | ainda não conferida |
+| Pagamento de Contas | `Efi.BillPayments.*` | a Efí não tem homologação; só produção |
+| Extratos | `Efi.Statements.*` | a Efí não tem homologação; só produção |
 
 "Conferida" quer dizer que a suíte `mix test --only sandbox` rodou contra a homologação da Efí.
 As demais APIs têm cada rota testada contra o formato da documentação, mas ainda não falaram com

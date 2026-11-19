@@ -36,7 +36,7 @@ defmodule Efi.Pix.DueCharge do
 
   Para reservar o QR Code antes da cobrança, crie um location com `Efi.Pix.Location.create/3` e
   `%{"tipoCob" => "cobv"}` e passe `"loc" => %{"id" => id}` no corpo. A imagem do QR Code sai de
-  `Efi.Pix.Location.qr_code/3` com o `loc.id` da resposta. Para criar muitas cobranças numa
+  `Efi.Pix.Location.get_qr_code/3` com o `loc.id` da resposta. Para criar muitas cobranças numa
   chamada só, veja `Efi.Pix.DueChargeBatch`.
   """
 

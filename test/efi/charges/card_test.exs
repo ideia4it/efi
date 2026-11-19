@@ -102,7 +102,7 @@ defmodule Efi.Charges.CardTest do
              })
 
     assert {:ok, %{"data" => "Reembolso em processamento"}} =
-             Card.refund(client, 3003, %{"amount" => 5000})
+             Card.refund(client, 3003, json: %{"amount" => 5000})
 
     assert {:ok, %{"data" => "Reembolso em processamento"}} = Card.refund(client, 3003)
   end

@@ -53,9 +53,9 @@ Efí. Num app parceiro, isso quer dizer o seu e um para cada cliente com conta a
 
 ## Guardar o token
 
-Cada API da Efí emite um token OAuth2 que vale uma hora. Sem `token_store`, a biblioteca pede um
-token antes de cada chamada, o que dobra as requisições. Com um, o token é reaproveitado até
-faltar um minuto para vencer. Uma implementação em ETS:
+Cada API da Efí emite um token OAuth2, que vale uma hora (10 minutos na Cobranças). Sem
+`token_store`, a biblioteca pede um token antes de cada chamada, o que dobra as requisições.
+Com um, o token é reaproveitado até faltar um minuto para vencer. Uma implementação em ETS:
 
 ```elixir
 defmodule MyApp.EfiTokenStore do
@@ -125,14 +125,16 @@ end
 `kind` vem do status HTTP e é o mesmo em todas as APIs. `name` e `message` vêm do corpo, que a
 Efí escreve em formatos diferentes por API; o corpo original fica em `body`.
 
-Uma escrita que volta com `:transport` (timeout, conexão caída) pode ter chegado à Efí. A
-biblioteca não repete escritas por isso: confira antes de tentar de novo, por exemplo criando
-cobranças com `txid` próprio, que torna a repetição segura.
+Uma escrita que volta com `:transport` (timeout, conexão caída) ou `:server` (5xx) pode ter
+chegado à Efí. A biblioteca não repete escritas por isso: confira antes de tentar de novo, por
+exemplo criando cobranças com `txid` próprio, que torna a repetição segura.
 
 ## Homologação
 
 Em `environment: :sandbox`, a Efí simula os pagamentos. Na API Pix, cobranças de R$ 0,01 a
 R$ 10,00 são pagas sozinhas e disparam o webhook; acima disso ficam ativas sem pagamento.
+Pagamento de Contas e Extratos não têm homologação: com um cliente `:sandbox`, as chamadas
+delas voltam `%Efi.Error{kind: :configuration, reason: {:environment, :unsupported}}`.
 
 ## Testes no seu app
 

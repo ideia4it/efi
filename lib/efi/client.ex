@@ -193,7 +193,7 @@ defmodule Efi.Client do
       "/v2/pix/E123/devolucao/dev%201"
   """
   @spec path(String.t(), keyword()) :: String.t()
-  def path(template, values \\ []) do
+  def path(template, values) do
     values = Map.new(values, fn {name, value} -> {Atom.to_string(name), value} end)
 
     Regex.replace(~r/:([A-Za-z_][A-Za-z0-9_]*)/, template, fn _match, name ->

@@ -58,6 +58,24 @@ defmodule Efi.Certificate do
   )
 
   Record.defrecordp(
+    :otp_subject_public_key_info,
+    :OTPSubjectPublicKeyInfo,
+    Record.extract(:OTPSubjectPublicKeyInfo, from_lib: "public_key/include/OTP-PUB-KEY.hrl")
+  )
+
+  Record.defrecordp(
+    :rsa_private_key,
+    :RSAPrivateKey,
+    Record.extract(:RSAPrivateKey, from_lib: "public_key/include/OTP-PUB-KEY.hrl")
+  )
+
+  Record.defrecordp(
+    :ec_private_key,
+    :ECPrivateKey,
+    Record.extract(:ECPrivateKey, from_lib: "public_key/include/OTP-PUB-KEY.hrl")
+  )
+
+  Record.defrecordp(
     :validity,
     :Validity,
     Record.extract(:Validity, from_lib: "public_key/include/OTP-PUB-KEY.hrl")
@@ -110,8 +128,8 @@ defmodule Efi.Certificate do
   Abre um PEM com o certificado e a chave privada sem cifra, no mesmo texto.
 
   Aceita o que o `openssl pkcs12 -nodes` escreve: a chave em PKCS#8 (`PRIVATE KEY`), RSA ou EC,
-  e um ou mais certificados. O certificado da aplicação é o único que não emitiu nenhum outro
-  do arquivo; os demais vão para `chain`.
+  e um ou mais certificados. O certificado da aplicação é o que tem a chave pública da chave
+  privada do arquivo; os demais vão para `chain`.
   """
   @spec from_pem(binary()) :: {:ok, t()} | {:error, Error.t()}
   def from_pem(pem) when is_binary(pem) do
@@ -119,13 +137,14 @@ defmodule Efi.Certificate do
     certificates = for {:Certificate, der, :not_encrypted} <- entries, do: der
 
     with {:ok, key} <- find_private_key(entries),
-         {:ok, leaf, chain} <- split_leaf(certificates),
-         {:ok, not_before, not_after} <- validity_period(leaf) do
+         {:ok, decoded} <- decode_certificates(certificates),
+         {:ok, {leaf, leaf_tbs}, chain} <- split_leaf(decoded, key),
+         {:ok, not_before, not_after} <- validity_period(leaf_tbs) do
       {:ok,
        %__MODULE__{
          certificate: leaf,
          key: key,
-         chain: chain,
+         chain: Enum.map(chain, &elem(&1, 0)),
          not_before: not_before,
          not_after: not_after
        }}
@@ -155,33 +174,46 @@ defmodule Efi.Certificate do
     end
   end
 
-  defp split_leaf([]), do: {:error, :invalid_file}
-  defp split_leaf([leaf]), do: {:ok, leaf, []}
+  defp decode_certificates(certificates) do
+    {:ok, Enum.map(certificates, &{&1, tbs(&1)})}
+  rescue
+    _malformed -> {:error, :invalid_file}
+  end
 
-  defp split_leaf(certificates) do
-    issuers = MapSet.new(certificates, &issuer_of/1)
+  # A ordem dos certificados dentro de um .p12 não é especificada: o da aplicação é o que casa
+  # com a chave privada, e os outros são a cadeia.
+  defp split_leaf(certificates, key) do
+    public_key = key |> decode_private_key() |> public_key_of_private()
 
-    case Enum.split_with(certificates, &(not MapSet.member?(issuers, subject_of(&1)))) do
+    case Enum.split_with(certificates, &(public_key_of_certificate(&1) == public_key)) do
       {[leaf], chain} -> {:ok, leaf, chain}
-      _ambiguous -> {:error, :invalid_file}
+      _none_or_many -> {:error, :invalid_file}
     end
   end
 
-  defp subject_of(der), do: der |> tbs() |> otp_tbs_certificate(:subject)
-  defp issuer_of(der), do: der |> tbs() |> otp_tbs_certificate(:issuer)
+  defp decode_private_key({type, der}),
+    do: :public_key.pem_entry_decode({type, der, :not_encrypted})
+
+  defp public_key_of_private(rsa_private_key(modulus: modulus, publicExponent: exponent)),
+    do: {:RSAPublicKey, modulus, exponent}
+
+  defp public_key_of_private(ec_private_key(publicKey: point)), do: {:ECPoint, point}
+
+  defp public_key_of_certificate({_der, tbs}) do
+    tbs
+    |> otp_tbs_certificate(:subjectPublicKeyInfo)
+    |> otp_subject_public_key_info(:subjectPublicKey)
+  end
 
   defp tbs(der), do: der |> :public_key.pkix_decode_cert(:otp) |> otp_certificate(:tbsCertificate)
 
-  defp validity_period(der) do
-    validity(notBefore: not_before, notAfter: not_after) =
-      der |> tbs() |> otp_tbs_certificate(:validity)
+  defp validity_period(tbs) do
+    validity(notBefore: not_before, notAfter: not_after) = otp_tbs_certificate(tbs, :validity)
 
     with {:ok, not_before} <- to_datetime(not_before),
          {:ok, not_after} <- to_datetime(not_after) do
       {:ok, not_before, not_after}
     end
-  rescue
-    _malformed -> {:error, :invalid_file}
   end
 
   # Um prazo para a chamada inteira e não um por invocação do openssl: a repetição com -legacy
@@ -208,13 +240,12 @@ defmodule Efi.Certificate do
     end
   end
 
+  # Um openssl sem a opção -legacy (LibreSSL, OpenSSL 1.1) ainda não abre a cifra: para quem
+  # chama, é um arquivo que este host não lê.
   defp retry_with_legacy(bundle, password, deadline) do
     case run(bundle, password, deadline, true) do
-      {:error, reason} when reason in [:invalid_file, :unsupported_cipher] ->
-        {:error, :invalid_file}
-
-      result ->
-        result
+      {:error, :unsupported_cipher} -> {:error, :invalid_file}
+      result -> result
     end
   end
 

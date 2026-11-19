@@ -77,6 +77,23 @@ defmodule Efi.Accounts.SimplifiedAccountTest do
     assert Base.decode64!(p12_base64) == "conteudo do p12"
   end
 
+  test "hands back the certificate without quotes when the Efí sends it as plain text" do
+    client = Efi.Test.client()
+    certificate_base64 = Base.encode64(<<0xFB, 0xFF>> <> "conteudo do p12")
+
+    Efi.Test.expect(
+      :post,
+      "#{@host}/v1/conta-simplificada/#{@account_id}/certificado",
+      fn conn, _body ->
+        conn
+        |> Plug.Conn.put_resp_content_type("text/plain")
+        |> Plug.Conn.send_resp(201, ~s("#{certificate_base64}"))
+      end
+    )
+
+    assert {:ok, ^certificate_base64} = SimplifiedAccount.create_certificate(client, @account_id)
+  end
+
   test "refuses a duplicated opening request and asks to wait while the account is processed" do
     client = Efi.Test.client()
 

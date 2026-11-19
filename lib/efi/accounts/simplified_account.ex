@@ -125,8 +125,10 @@ defmodule Efi.Accounts.SimplifiedAccount do
   end
 
   @doc """
-  Cria um certificado para a conta do cliente e o devolve em Base64: decodificado, é um `.p12`
-  sem senha, pronto para `Efi.Certificate.from_p12/1`.
+  Cria um certificado para a conta do cliente e devolve `{:ok, base64}`: o `.p12` sem senha
+  codificado em Base64, sem as aspas da resposta. Para abrir:
+
+      {:ok, certificate} = base64 |> Base.decode64!() |> Efi.Certificate.from_p12()
 
   `POST /v1/conta-simplificada/:idContaSimplificada/certificado` · escopo `gn.registration.read`
 
@@ -139,6 +141,17 @@ defmodule Efi.Accounts.SimplifiedAccount do
         idContaSimplificada: account_id
       )
 
-    Client.request(client, :accounts, :post, path, opts)
+    with {:ok, body} when is_binary(body) <- Client.request(client, :accounts, :post, path, opts) do
+      {:ok, unwrap_json_string(body)}
+    end
+  end
+
+  # A Efí responde o Base64 como string JSON (`"MIIK..."`). Com content-type JSON, o Client já
+  # tirou as aspas; sem ele, o corpo chega como texto e as aspas fariam o Base.decode64! falhar.
+  defp unwrap_json_string(body) do
+    case Jason.decode(body) do
+      {:ok, base64} when is_binary(base64) -> base64
+      _already_unwrapped -> body
+    end
   end
 end

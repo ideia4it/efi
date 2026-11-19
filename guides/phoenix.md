@@ -316,6 +316,8 @@ compartilhado e o teste não roda em paralelo:
 defmodule MyAppWeb.CheckoutLiveTest do
   use MyAppWeb.ConnCase, async: false
 
+  import Phoenix.LiveViewTest
+
   setup {Req.Test, :set_req_test_to_shared}
 
   test "shows the Pix QR Code for the order", %{conn: conn} do

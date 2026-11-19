@@ -12,7 +12,7 @@ defmodule Efi.Pix.ImmediateCharge do
           "calendario" => %{"expiracao" => 3600},
           "devedor" => %{"cpf" => "12345678909", "nome" => "Cliente do Studio Ana"},
           "valor" => %{"original" => "50.00"},
-          "chave" => "chave-pix-da-conta",
+          "chave" => "chave-pix-do-studio-ana",
           "solicitacaoPagador" => "Corte e escova"
         })
 

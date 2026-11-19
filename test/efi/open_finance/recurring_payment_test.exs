@@ -7,7 +7,7 @@ defmodule Efi.OpenFinance.RecurringPaymentTest do
 
   @idempotency_key "9a3e1d2c-5b4f-4e6a-8c7d-1f2e3d4c5b6a"
   @payment_id "urn:efi:ae71713f-875b-4af3-9d85-0bcb43288847"
-  @payment_path "openfinance-h.api.efipay.com.br/v1/pagamentos-recorrentes/pix/urn%3Aefi%3Aae71713f-875b-4af3-9d85-0bcb43288847"
+  @payment_path "openfinance-h.api.efipay.com.br/v1/pagamentos-recorrentes/pix/urn:efi:ae71713f-875b-4af3-9d85-0bcb43288847"
   @paid_installment "E09089356202612101500studioana01"
   @rejected_installment "E09089356202701101500studioana02"
 

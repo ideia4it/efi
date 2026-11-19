@@ -253,6 +253,10 @@ defmodule Efi.ClientTest do
         {403, %{"title" => "Proibido"}, :forbidden, nil, "Proibido"},
         {404, %{"nome" => "cobranca_nao_encontrada", "mensagem" => "Não encontrada."}, :not_found,
          "cobranca_nao_encontrada", "Não encontrada."},
+        {412, %{"nome" => "conta_em_processamento", "mensagem" => "A conta está em análise."},
+         :precondition_failed, "conta_em_processamento", "A conta está em análise."},
+        {400, %{"erro" => 0, "descricao" => "Código de barras inválido."}, :validation, nil,
+         "Código de barras inválido."},
         {429, "Too Many Requests", :rate_limited, nil, nil},
         {500, %{"nome" => "erro_aplicacao"}, :server, "erro_aplicacao", nil},
         {418, %{}, :http, nil, nil}
@@ -260,7 +264,11 @@ defmodule Efi.ClientTest do
 
       for {status, body, kind, name, message} <- responses do
         Efi.Test.expect(:get, "pix-h.api.efipay.com.br/v2/cob/abc", fn conn, _body ->
-          conn = Plug.Conn.put_status(conn, status)
+          conn =
+            conn
+            |> Plug.Conn.put_status(status)
+            |> Plug.Conn.put_resp_header("retry-after", "2")
+
           if is_map(body), do: Req.Test.json(conn, body), else: Req.Test.text(conn, body)
         end)
 
@@ -270,6 +278,7 @@ defmodule Efi.ClientTest do
                  {kind, status, name, message}
 
         assert error.body == body
+        assert error.headers["retry-after"] == ["2"]
       end
     end
 

@@ -4,7 +4,7 @@ Cliente Elixir para as APIs da [Efí](https://dev.efipay.com.br): Pix (com Pix A
 split), Cobranças (boleto, carnê, cartão, link de pagamento e assinaturas), Open Finance,
 Abertura de Contas, Pagamento de Contas e Extratos.
 
-- **Uma função por rota.** São 174 rotas, cada uma com `@doc` que aponta para a seção exata da
+- **Uma função por rota.** São 172 rotas, cada uma com `@doc` que aponta para a seção exata da
   documentação oficial, com o método, o caminho e o escopo exigido.
 - **Os dados da Efí, sem tradução.** Parâmetros e respostas são mapas com os nomes que a Efí usa
   (`"calendario"`, `"valor"`, `"txid"`). O que a documentação mostra é o que se envia.

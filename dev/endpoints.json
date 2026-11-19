@@ -333,7 +333,8 @@
   "method": "PUT",
   "path": "/v1/carnet/:id/parcel/",
   "scope": null,
-  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/carne#2-por-meio-de-requisição-via-api-1"
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/carne#2-por-meio-de-requisição-via-api-1",
+  "skip": "erro de digitação na doc (\":parcel/settle\" separado por espaço); é PUT /v1/carnet/:id/parcel/:parcel/settle, em Efi.Charges.Carnet.settle_parcel/4"
  },
  {
   "family": "cobrancas",
@@ -403,7 +404,8 @@
   "method": "PUT",
   "path": "/v1/charge:id/cancel",
   "scope": null,
-  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/cartao#cancelar-uma-transação-existente"
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/cartao#cancelar-uma-transação-existente",
+  "skip": "erro de digitação na página de cartão (falta a barra); é PUT /v1/charge/:id/cancel, em Efi.Charges.Charge.cancel/3"
  },
  {
   "family": "cobrancas",
@@ -1334,8 +1336,7 @@
   "method": "GET",
   "path": "/v2/gn/chaves/balde",
   "scope": null,
-  "doc": null,
-  "note": "fora da extração automática da doc; conferir na página"
+  "doc": null
  },
  {
   "family": "cobrancas",
@@ -1343,30 +1344,28 @@
   "path": "/v2/charge/card",
   "scope": null,
   "doc": null,
-  "note": "fora da extração automática da doc; conferir na página"
+  "note": "fora da extração automática da doc; conferir na página",
+  "skip": "só no SDK de Node; a doc (conferida em 19/11/2026) documenta POST /v1/charge/card, em Efi.Charges.Card.create/3"
  },
  {
   "family": "pix",
   "method": "PUT",
   "path": "/v2/gn/split/cob/:txid/vinculo/:splitConfigId",
   "scope": null,
-  "doc": null,
-  "note": "fora da extração automática da doc; conferir na página"
+  "doc": null
  },
  {
   "family": "pix",
   "method": "PUT",
   "path": "/v2/gn/split/cobv/:txid/vinculo/:splitConfigId",
   "scope": null,
-  "doc": null,
-  "note": "fora da extração automática da doc; conferir na página"
+  "doc": null
  },
  {
   "family": "pix",
   "method": "POST",
   "path": "/v2/gn/qrcodes/detalhar",
   "scope": null,
-  "doc": null,
-  "note": "fora da extração automática da doc; conferir na página"
+  "doc": null
  }
 ]

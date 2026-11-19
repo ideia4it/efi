@@ -11,6 +11,7 @@ defmodule Efi.Error do
   | `:forbidden` | 403: a aplicação não tem o escopo da rota |
   | `:not_found` | 404 |
   | `:conflict` | 409: o recurso já existe (por exemplo, `txid` repetido) |
+  | `:precondition_failed` | 412: falta um passo antes (na Abertura de Contas, a conta ainda em análise ou o webhook não cadastrado) |
   | `:rate_limited` | 429 |
   | `:server` | 5xx |
   | `:http` | outro status fora de 2xx |
@@ -22,7 +23,9 @@ defmodule Efi.Error do
   `name` e `message` vêm do corpo da resposta. Cada API da Efí devolve erro num formato, e todos
   são lidos aqui: `nome`/`mensagem` (Pix, Open Finance, Abertura de Contas), o padrão do Banco
   Central `type`/`title`/`detail` com `violacoes`, e `error`/`error_description` (Cobranças e
-  OAuth). O corpo inteiro fica em `body`, para quem precisa de um campo que não foi normalizado.
+  OAuth), além de `descricao` (Pagamento de Contas). O corpo inteiro fica em `body`, para quem
+  precisa de um campo que não foi normalizado, e os headers da resposta em `headers`: num 429, o
+  `retry-after` diz quantos segundos esperar.
   """
 
   @type kind ::
@@ -31,6 +34,7 @@ defmodule Efi.Error do
           | :forbidden
           | :not_found
           | :conflict
+          | :precondition_failed
           | :rate_limited
           | :server
           | :http
@@ -45,10 +49,11 @@ defmodule Efi.Error do
           name: String.t() | nil,
           message: String.t() | nil,
           body: term(),
+          headers: %{optional(String.t()) => [String.t()]},
           reason: term()
         }
 
-  defexception [:kind, :status, :name, :message, :body, :reason]
+  defexception [:kind, :status, :name, :message, :body, :reason, headers: %{}]
 
   @impl Exception
   def message(%__MODULE__{} = error) do
@@ -58,14 +63,15 @@ defmodule Efi.Error do
   end
 
   @doc false
-  @spec from_response(pos_integer(), term()) :: t()
-  def from_response(status, body) do
+  @spec from_response(pos_integer(), term(), map()) :: t()
+  def from_response(status, body, headers) do
     %__MODULE__{
       kind: kind_for_status(status),
       status: status,
       name: error_name(body),
       message: error_message(body),
-      body: body
+      body: body,
+      headers: headers
     }
   end
 
@@ -77,6 +83,7 @@ defmodule Efi.Error do
   defp kind_for_status(403), do: :forbidden
   defp kind_for_status(404), do: :not_found
   defp kind_for_status(409), do: :conflict
+  defp kind_for_status(412), do: :precondition_failed
   defp kind_for_status(429), do: :rate_limited
   defp kind_for_status(status) when status >= 500, do: :server
   defp kind_for_status(_status), do: :http
@@ -99,5 +106,6 @@ defmodule Efi.Error do
     do: message
 
   defp error_message(%{"title" => title}) when is_binary(title), do: title
+  defp error_message(%{"descricao" => description}) when is_binary(description), do: description
   defp error_message(_body), do: nil
 end

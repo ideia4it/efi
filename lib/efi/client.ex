@@ -191,6 +191,9 @@ defmodule Efi.Client do
 
       iex> Efi.Client.path("/v2/pix/:e2eId/devolucao/:id", e2eId: "E123", id: "dev 1")
       "/v2/pix/E123/devolucao/dev%201"
+
+      iex> Efi.Client.path("/v1/pagamentos/pix/:id/devolver", id: "urn:efi:a/b")
+      "/v1/pagamentos/pix/urn:efi:a%2Fb/devolver"
   """
   @spec path(String.t(), keyword()) :: String.t()
   def path(template, values) do
@@ -198,11 +201,16 @@ defmodule Efi.Client do
 
     Regex.replace(~r/:([A-Za-z_][A-Za-z0-9_]*)/, template, fn _match, name ->
       case Map.fetch(values, name) do
-        {:ok, value} -> URI.encode(to_string(value), &URI.char_unreserved?/1)
+        {:ok, value} -> URI.encode(to_string(value), &path_character?/1)
         :error -> raise ArgumentError, "missing value for :#{name} in #{template}"
       end
     end)
   end
+
+  # Dois-pontos e arroba valem num segmento de caminho (RFC 3986) e ficam como estão: os
+  # identificadores de pagamento do Open Finance são URNs (`urn:efi:...`). A barra é codificada,
+  # para um valor nunca virar outro segmento.
+  defp path_character?(character), do: URI.char_unreserved?(character) or character in ~c":@"
 
   @doc false
   @spec base_url(t(), api()) :: String.t()
@@ -285,7 +293,8 @@ defmodule Efi.Client do
         {:ok, Token.from_response(decode(response), DateTime.utc_now())}
 
       {:ok, %Req.Response{status: status} = response} ->
-        {:error, %{Error.from_response(status, decode(response)) | kind: :authentication}}
+        error = Error.from_response(status, decode(response), response.headers)
+        {:error, %{error | kind: :authentication}}
 
       {:error, exception} ->
         {:error, %Error{kind: :transport, reason: exception}}
@@ -346,7 +355,7 @@ defmodule Efi.Client do
     do: {:ok, decode(response)}
 
   defp classify({:ok, %Req.Response{status: status} = response}),
-    do: {:error, Error.from_response(status, decode(response))}
+    do: {:error, Error.from_response(status, decode(response), response.headers)}
 
   defp classify({:error, exception}), do: {:error, %Error{kind: :transport, reason: exception}}
 

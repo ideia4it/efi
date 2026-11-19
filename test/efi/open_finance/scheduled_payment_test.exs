@@ -61,7 +61,7 @@ defmodule Efi.OpenFinance.ScheduledPaymentTest do
 
     Efi.Test.expect(
       :patch,
-      "openfinance-h.api.efipay.com.br/v1/pagamentos-agendados/pix/urn%3Aefi%3A5c2a9e1f-0d3b-4c7a-8e6f-1a2b3c4d5e6f/cancelar",
+      "openfinance-h.api.efipay.com.br/v1/pagamentos-agendados/pix/urn:efi:5c2a9e1f-0d3b-4c7a-8e6f-1a2b3c4d5e6f/cancelar",
       fn conn, body ->
         assert body == nil
 
@@ -75,7 +75,7 @@ defmodule Efi.OpenFinance.ScheduledPaymentTest do
 
     Efi.Test.expect(
       :post,
-      "openfinance-h.api.efipay.com.br/v1/pagamentos-agendados/pix/urn%3Aefi%3A49315a93-d39c-4564-9edb-9a73678dbdb1/devolver",
+      "openfinance-h.api.efipay.com.br/v1/pagamentos-agendados/pix/urn:efi:49315a93-d39c-4564-9edb-9a73678dbdb1/devolver",
       fn conn, body ->
         assert body == %{"endToEndId" => @paid_end_to_end_id, "valor" => "120.00"}
 

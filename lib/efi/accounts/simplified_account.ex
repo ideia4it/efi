@@ -126,7 +126,8 @@ defmodule Efi.Accounts.SimplifiedAccount do
 
   @doc """
   Cria um certificado para a conta do cliente e o devolve em Base64: decodificado, é um `.p12`
-  sem senha, pronto para `Efi.Certificate.from_p12/1`.
+  sem senha, pronto para `Efi.Certificate.from_p12/1`. A doc mostra a resposta como uma string
+  JSON entre aspas; a função devolve o Base64 sem aspas, venha a resposta como JSON ou como texto.
 
   `POST /v1/conta-simplificada/:idContaSimplificada/certificado` · escopo `gn.registration.read`
 
@@ -139,6 +140,8 @@ defmodule Efi.Accounts.SimplifiedAccount do
         idContaSimplificada: account_id
       )
 
-    Client.request(client, :accounts, :post, path, opts)
+    with {:ok, certificate} <- Client.request(client, :accounts, :post, path, opts) do
+      {:ok, String.trim(certificate, "\"")}
+    end
   end
 end

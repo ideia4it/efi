@@ -29,6 +29,11 @@ defmodule Efi.Pix.ImmediateChargeTest do
       Req.Test.json(conn, %{"txid" => @txid, "revisao" => 1, "valor" => %{"original" => "60.00"}})
     end)
 
+    Efi.Test.expect(:get, "pix-h.api.efipay.com.br/v2/cob/#{@txid}", fn conn, _body ->
+      assert conn.query_params == %{}
+      Req.Test.json(conn, %{"txid" => @txid, "revisao" => 1, "status" => "ATIVA"})
+    end)
+
     Efi.Test.expect(:get, "pix-h.api.efipay.com.br/v2/cob", fn conn, _body ->
       assert conn.query_params == %{
                "inicio" => "2026-11-19T00:00:00Z",
@@ -50,6 +55,8 @@ defmodule Efi.Pix.ImmediateChargeTest do
 
     assert {:ok, %{"valor" => %{"original" => "60.00"}}} =
              ImmediateCharge.get(client, @txid, params: %{"revisao" => 1})
+
+    assert {:ok, %{"revisao" => 1, "status" => "ATIVA"}} = ImmediateCharge.get(client, @txid)
 
     assert {:ok, %{"cobs" => [%{"txid" => @txid}]}} =
              ImmediateCharge.list(client, %{

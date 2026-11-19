@@ -7,7 +7,7 @@ defmodule Efi.OpenFinance.ImmediatePaymentTest do
 
   @idempotency_key "6f1c2b9e-6a57-4c1e-9d2a-7b3e8f0a1c55"
   @payment_id "urn:efi:ae71713f-875b-4af3-9d85-0bcb43288847"
-  @encoded_payment_id "urn%3Aefi%3Aae71713f-875b-4af3-9d85-0bcb43288847"
+  @encoded_payment_id "urn:efi:ae71713f-875b-4af3-9d85-0bcb43288847"
   @payment %{
     "pagador" => %{
       "idParticipante" => "9f4cd202-8f2b-11ec-b909-0242ac120002",

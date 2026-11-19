@@ -10,6 +10,7 @@ defmodule Efi.Pix.Automatic.Webhook do
           "webhookUrl" => "https://app.example.com/webhooks/efi?ignorar="
         })
 
+  O cadastro segue as mesmas regras do webhook Pix comum, explicadas em `Efi.Pix.Webhook`.
   Pegadinhas que a Efí descreve:
 
     * a Efí envia uma notificação de teste ao cadastrar. Nas notificações de verdade, acrescenta

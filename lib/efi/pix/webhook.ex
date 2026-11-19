@@ -19,7 +19,8 @@ defmodule Efi.Pix.Webhook do
   `https://app.example.com/webhooks/efi` recebe em `https://app.example.com/webhooks/efi/pix`.
   Para atender as duas numa rota só, a Efí orienta terminar a URL com o parâmetro `ignorar=`
   vazio (`?ignorar=`, ou `&ignorar=` se a URL já tem query): o `/pix` vira o valor desse
-  parâmetro e o caminho não muda.
+  parâmetro e o caminho não muda
+  ([documentação](https://dev.efipay.com.br/docs/api-pix/webhooks#configurar-o-webhook-pix)).
 
   ## mTLS
 
@@ -39,9 +40,11 @@ defmodule Efi.Pix.Webhook do
   ## Atrás de um proxy que encerra o TLS
 
   Quando o TLS termina num proxy da plataforma, como no Fly.io, no Heroku e no Render na
-  configuração padrão, o app nunca vê o certificado da Efí e a verificação acima não passa. Nesse
+  configuração padrão, o app nunca vê o certificado da Efí, e sem mTLS o cadastro falha. Nesse
   caso, configure com `skip_mtls_checking: true`, que envia o header `x-skip-mtls-checking: true`
-  e faz a Efí aceitar a URL sem o mTLS:
+  e faz a Efí aceitar a URL sem testar o mTLS. A documentação da Efí não descreve esse header,
+  mas a Efí o aceita no cadastro e os SDKs oficiais o oferecem (no de Node, a opção
+  `skipMtlsChecking`):
 
       Efi.Pix.Webhook.configure(
         client,
@@ -51,13 +54,14 @@ defmodule Efi.Pix.Webhook do
       )
 
   Sem mTLS, qualquer um que descubra a URL consegue chamá-la. A Efí recomenda duas camadas, de
-  preferência juntas
-  ([documentação](https://dev.efipay.com.br/docs/api-pix/webhooks#camada-adicional-de-segurança)):
+  preferência juntas:
 
     * um segredo próprio na query, como o `hmac` acima, que o app compara em tempo constante
-      antes de processar a notificação. O segredo viaja na URL, então tire-o dos logs e do
-      rastreador de erros;
-    * aceitar só o IP de onde a Efí envia as notificações, hoje `34.193.116.226`.
+      antes de processar a notificação
+      ([documentação](https://dev.efipay.com.br/docs/api-pix/webhooks#utilizando-hmac-na-url-do-webhook)).
+      O segredo viaja na URL, então tire-o dos logs e do rastreador de erros;
+    * aceitar só o IP de onde a Efí envia as notificações, hoje `34.193.116.226`
+      ([documentação](https://dev.efipay.com.br/docs/api-pix/webhooks#validação-por-ip)).
 
   E trate a notificação como aviso: confira o pagamento com `Efi.Pix.Received.get/3` antes de dar
   baixa.

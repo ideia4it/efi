@@ -16,6 +16,8 @@ defmodule Efi.OpenFinance.ImmediatePayment do
   5. O resultado chega pelo webhook. A volta ao `redirectURL` não confirma o pagamento; sem
      webhook, consulte com `list/3` passando `"identificador"`.
 
+  O passo 3, com a chave de idempotência como segundo argumento:
+
       {:ok, %{"identificadorPagamento" => payment_id, "redirectURI" => bank_url}} =
         Efi.OpenFinance.ImmediatePayment.create(
           client,

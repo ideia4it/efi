@@ -125,9 +125,10 @@ defmodule Efi.Accounts.SimplifiedAccount do
   end
 
   @doc """
-  Cria um certificado para a conta do cliente e o devolve em Base64: decodificado, é um `.p12`
-  sem senha, pronto para `Efi.Certificate.from_p12/1`. A doc mostra a resposta como uma string
-  JSON entre aspas; a função devolve o Base64 sem aspas, venha a resposta como JSON ou como texto.
+  Cria um certificado para a conta do cliente e devolve `{:ok, base64}`: o `.p12` sem senha
+  codificado em Base64, sem as aspas da resposta. Para abrir:
+
+      {:ok, certificate} = base64 |> Base.decode64!() |> Efi.Certificate.from_p12()
 
   `POST /v1/conta-simplificada/:idContaSimplificada/certificado` · escopo `gn.registration.read`
 

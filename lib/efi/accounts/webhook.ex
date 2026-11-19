@@ -11,12 +11,22 @@ defmodule Efi.Accounts.Webhook do
           "webhookUrl" => "https://app.example.com/efi/contas"
         })
 
+  ## mTLS no cadastro
+
   A URL precisa de HTTPS, TLS 1.2 ou mais novo e mTLS com a cadeia pública da Efí
   (`https://certificados.efipay.com.br/webhooks/certificate-chain-prod.crt` em produção,
   `https://certificados.efipay.com.br/webhooks/certificate-chain-homolog.crt` em homologação).
-  No cadastro, a Efí chama a URL uma vez sem certificado, chamada que o servidor deve recusar,
-  e outra com o certificado. Se a verificação falha, o erro volta com status 400 e um `name`
-  como `"mtls_nao_configurado"`, `"url_inacessivel"` ou `"url_cadastrada"`.
+  A Efí testa o mTLS do servidor no cadastro: chama a URL uma vez sem certificado, chamada que
+  o servidor deve recusar, e outra com o certificado. Se o teste falha, o erro volta com status
+  400 e um `name` como `"mtls_nao_configurado"`, `"url_inacessivel"` ou `"url_cadastrada"`.
+
+  Atrás de um proxy que encerra o TLS (Fly.io, Heroku, Render), o app nunca vê o certificado
+  da Efí e o teste falha. No webhook Pix, os SDKs oficiais contornam isso com
+  `skip_mtls_checking: true` (header `x-skip-mtls-checking`), mas a doc da Abertura de Contas
+  não cita o header: confirme na homologação se esta API o aceita e, se aceitar, proteja a URL
+  de outra forma. O app também pode não depender da notificação e consultar
+  `Efi.Accounts.SimplifiedAccount.get_credentials/3` até a conta abrir, mas um webhook
+  cadastrado continua obrigatório para pedir a abertura.
 
   ## A notificação
 
@@ -37,9 +47,10 @@ defmodule Efi.Accounts.Webhook do
   @doc """
   Cadastra a URL do webhook e devolve o `identificadorWebhook`.
 
-  Para trocar a URL de um webhook cadastrado, a tabela de atributos da Efí pede `webhookUrl`
-  com o `identificadorWebhook`, enquanto o exemplo de edição da mesma página usa `url` e
-  `chave`. O mapa vai como está, então siga o formato que a Efí aceitar.
+  Para adicionar, envie `%{"webhookUrl" => url}`. Para trocar a URL de um webhook cadastrado,
+  o exemplo de edição da Efí envia `%{"url" => nova_url, "chave" => identificador_webhook}`; a
+  tabela de atributos da mesma página descreve a edição como `webhookUrl` com
+  `identificadorWebhook`. O mapa vai como está.
 
   `POST /v1/webhook` · escopo `gn.registration.webhook.write`
 

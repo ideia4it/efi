@@ -77,9 +77,9 @@ defmodule Efi.Accounts.SimplifiedAccountTest do
     assert Base.decode64!(p12_base64) == "conteudo do p12"
   end
 
-  test "hands back the certificate without quotes when Efí sends it as plain text" do
+  test "hands back the certificate without quotes when the Efí sends it as plain text" do
     client = Efi.Test.client()
-    certificate_base64 = Base.encode64("conteudo do p12")
+    certificate_base64 = Base.encode64(<<0xFB, 0xFF>> <> "conteudo do p12")
 
     Efi.Test.expect(
       :post,

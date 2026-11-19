@@ -1,0 +1,1372 @@
+[
+ {
+  "family": "abertura-de-contas",
+  "method": "POST",
+  "path": "/v1/conta-simplificada",
+  "scope": "gn.registration.write",
+  "doc": "https://dev.efipay.com.br/docs/api-abertura-de-contas/cadastro-simplificado#solicitar-abertura-de-conta-simplificada"
+ },
+ {
+  "family": "abertura-de-contas",
+  "method": "GET",
+  "path": "/v1/conta-simplificada/:idContaSimplificada/credenciais",
+  "scope": "gn.registration.read",
+  "doc": "https://dev.efipay.com.br/docs/api-abertura-de-contas/cadastro-simplificado#recuperar-credenciais-de-uma-conta-simplificada"
+ },
+ {
+  "family": "abertura-de-contas",
+  "method": "POST",
+  "path": "/v1/conta-simplificada/:idContaSimplificada/certificado",
+  "scope": "gn.registration.read",
+  "doc": "https://dev.efipay.com.br/docs/api-abertura-de-contas/cadastro-simplificado#criar-certificado-de-uma-conta-simplificada"
+ },
+ {
+  "family": "abertura-de-contas",
+  "method": "POST",
+  "path": "/v1/webhook",
+  "scope": "gn.registration.webhook.write",
+  "doc": "https://dev.efipay.com.br/docs/api-abertura-de-contas/webhook#configurar-o-webhook"
+ },
+ {
+  "family": "abertura-de-contas",
+  "method": "GET",
+  "path": "/v1/webhook/:identificadorWebhook",
+  "scope": "gn.registration.webhook.read",
+  "doc": "https://dev.efipay.com.br/docs/api-abertura-de-contas/webhook#detalhar-webhook"
+ },
+ {
+  "family": "abertura-de-contas",
+  "method": "GET",
+  "path": "/v1/webhooks",
+  "scope": "gn.registration.webhook.read",
+  "doc": "https://dev.efipay.com.br/docs/api-abertura-de-contas/webhook#listar-webhooks"
+ },
+ {
+  "family": "abertura-de-contas",
+  "method": "DELETE",
+  "path": "/v1/webhook/:identificadorWebhook",
+  "scope": "gn.registration.webhook.write",
+  "doc": "https://dev.efipay.com.br/docs/api-abertura-de-contas/webhook#cancelar-webhook"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/plan",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/assinatura#crie-o-plano-de-assinatura"
+ },
+ {
+  "family": "cobrancas",
+  "method": "GET",
+  "path": "/v1/plans",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/assinatura#retornar-informações-de-um-plano"
+ },
+ {
+  "family": "cobrancas",
+  "method": "PUT",
+  "path": "/v1/plan/:id",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/assinatura#permitir-a-edição-do-nome-do-plano-de-assinatura"
+ },
+ {
+  "family": "cobrancas",
+  "method": "DELETE",
+  "path": "/v1/plan/:id",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/assinatura#cancelar-um-plano-de-assinatura"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/plan/:id/subscription/one-step",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/assinatura#crie-inscrições-assinaturas-para-vincular-ao-plano-em-one-step"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/plan/:id/subscription",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/assinatura#1-crie-inscrições-assinaturas-para-vincular-ao-plano"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/subscription/:id/pay",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/assinatura#2-defina-a-forma-de-pagamento-da-assinatura-e-os-dados-do-cliente"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/charge/:id/retry",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/assinatura#retentativa-de-pagamento-de-assinatura-via-cartão-de-crédito"
+ },
+ {
+  "family": "cobrancas",
+  "method": "GET",
+  "path": "/v1/subscription/:id",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/assinatura#retornar-informações-de-uma-assinatura-vinculada-a-um-plano"
+ },
+ {
+  "family": "cobrancas",
+  "method": "GET",
+  "path": "/v1/charges",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/assinatura#retornar-lista-de-cobranças"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/plan/:id/subscription/one-step/link",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/assinatura#associar-plano-ao-link-de-pagamento"
+ },
+ {
+  "family": "cobrancas",
+  "method": "PUT",
+  "path": "/v1/subscription/:id/metadata",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/assinatura#incluir-notification_url-e-custom_id-em-uma-assinatura-existente"
+ },
+ {
+  "family": "cobrancas",
+  "method": "PUT",
+  "path": "/v1/subscription/:id",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/assinatura#alterar-dados-de-uma-assinatura"
+ },
+ {
+  "family": "cobrancas",
+  "method": "PUT",
+  "path": "/v1/subscription/:id/cancel",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/assinatura#cancelar-uma-assinatura"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/subscription/:id/history",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/assinatura#acrescentar-descrição-ao-histórico-de-uma-assinatura"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/charge/:id/subscription/resend",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/assinatura#reenvio-do-link-associado-ao-plano-para-o-email-desejado"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/charge/one-step",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/boleto#criação-de-boleto-bolix-em-one-step-um-passo"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/charge",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/boleto#1-criar-transação"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/charge/:id/pay",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/boleto#2-associar-à-forma-de-pagamento-via-boleto"
+ },
+ {
+  "family": "cobrancas",
+  "method": "GET",
+  "path": "/v1/charge/:id",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/boleto#retornar-informações-de-cobrança-existente"
+ },
+ {
+  "family": "cobrancas",
+  "method": "GET",
+  "path": "/v1/charges",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/boleto#retornar-lista-de-cobranças"
+ },
+ {
+  "family": "cobrancas",
+  "method": "PUT",
+  "path": "/v1/charge/:id/metadata",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/boleto#incluir-notification_url-e-custom_id-em-uma-transação-existente"
+ },
+ {
+  "family": "cobrancas",
+  "method": "PUT",
+  "path": "/v1/charge/:id/billet",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/boleto#alterar-data-de-vencimento-de-uma-transação-existente"
+ },
+ {
+  "family": "cobrancas",
+  "method": "PUT",
+  "path": "/v1/charge/:id/cancel",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/boleto#cancelar-uma-transação-existente"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/charge/:id/billet/resend",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/boleto#reenvio-do-boleto-bancário-para-o-email-desejado"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/charge/:id/history",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/boleto#acrescentar-descrição-ao-histórico-de-uma-transação"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/charge/:id/balance-sheet",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/boleto#definir-que-a-transação-será-do-tipo-boleto-balancete"
+ },
+ {
+  "family": "cobrancas",
+  "method": "PUT",
+  "path": "/v1/charge/:id/settle",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/boleto#marcar-como-pago-determinada-transação"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/carnet",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/carne#criando-carnês"
+ },
+ {
+  "family": "cobrancas",
+  "method": "GET",
+  "path": "/v1/carnet/:id",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/carne#retornar-informações-de-carnê-existente"
+ },
+ {
+  "family": "cobrancas",
+  "method": "GET",
+  "path": "/v1/charges",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/carne#retornar-lista-de-carnês"
+ },
+ {
+  "family": "cobrancas",
+  "method": "PUT",
+  "path": "/v1/carnet/:id/metadata",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/carne#incluir-notification_url-e-custom_id-de-carnês"
+ },
+ {
+  "family": "cobrancas",
+  "method": "PUT",
+  "path": "/v1/carnet/:id/parcel/:parcel",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/carne#alterar-vencimento-de-parcela-específica-do-carnê"
+ },
+ {
+  "family": "cobrancas",
+  "method": "PUT",
+  "path": "/v1/carnet/:id/parcels",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/carne#alterar-vencimento-de-parcelas-de-um-carnê"
+ },
+ {
+  "family": "cobrancas",
+  "method": "PUT",
+  "path": "/v1/carnet/:id/cancel",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/carne#cancelar-um-carnê"
+ },
+ {
+  "family": "cobrancas",
+  "method": "PUT",
+  "path": "/v1/carnet/:id/parcel/:parcel/cancel",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/carne#cancelar-parcela-específica-de-carnê"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/carnet/:id/resend",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/carne#reenvio-do-carnê-para-o-email-desejado"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/carnet/:id/parcel/:parcel/resend",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/carne#reenvio-de-uma-parcela-específica-de-carnê-por-e-mail"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/carnet/:id/history",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/carne#acrescentar-descrição-ao-histórico-de-uma-transação"
+ },
+ {
+  "family": "cobrancas",
+  "method": "PUT",
+  "path": "/v1/carnet/:id/settle",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/carne#2-por-meio-de-requisição-via-api"
+ },
+ {
+  "family": "cobrancas",
+  "method": "PUT",
+  "path": "/v1/carnet/:id/parcel/",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/carne#2-por-meio-de-requisição-via-api-1"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/charge/card",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/cartao#criação-de-cobrança-por-cartão-de-crédito-com-autenticação-3ds"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/charge/one-step",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/cartao#criação-de-cobrança-por-cartão-de-crédito-em-one-step-um-passo"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/charge",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/cartao#1-criar-transação"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/charge/:id/pay",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/cartao#2-associar-à-forma-de-pagamento-via-cartão"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/charge/:id/retry",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/cartao#retentativa-de-pagamento-via-cartão-de-crédito"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/charge/card/:id/refund",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/cartao#estorno-de-pagamento-via-cartão-de-crédito"
+ },
+ {
+  "family": "cobrancas",
+  "method": "GET",
+  "path": "/v1/charge/:id",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/cartao#retornar-informações-de-cobrança-existente"
+ },
+ {
+  "family": "cobrancas",
+  "method": "GET",
+  "path": "/v1/charges",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/cartao#retornar-lista-de-cobranças"
+ },
+ {
+  "family": "cobrancas",
+  "method": "PUT",
+  "path": "/v1/charge/:id/metadata",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/cartao#incluir-notification_url-e-custom_id-em-uma-transação-existente"
+ },
+ {
+  "family": "cobrancas",
+  "method": "PUT",
+  "path": "/v1/charge:id/cancel",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/cartao#cancelar-uma-transação-existente"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/charge/:id/history",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/cartao#acrescentar-descrição-ao-histórico-de-uma-transação"
+ },
+ {
+  "family": "cobrancas",
+  "method": "GET",
+  "path": "/v1/installments",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/cartao#listar-parcelas-de-acordo-com-a-bandeira-do-cartão"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/charge/one-step/link",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/link-de-pagamento#criando-o-link-de-pagamento-em-one-step"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/charge",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/link-de-pagamento#1-crie-a-transação"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/charge/:id/link",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/link-de-pagamento#2-crie-um-link-de-pagamento"
+ },
+ {
+  "family": "cobrancas",
+  "method": "GET",
+  "path": "/v1/charge/:id",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/link-de-pagamento#retornar-informações-de-um-link-de-pagamento"
+ },
+ {
+  "family": "cobrancas",
+  "method": "PUT",
+  "path": "/v1/charge/:id/metadata",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/link-de-pagamento#incluir-notification_url-e-custom_id-em-uma-transação-existente"
+ },
+ {
+  "family": "cobrancas",
+  "method": "PUT",
+  "path": "/v1/charge/:id/link",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/link-de-pagamento#alterar-determinados-parâmetrosatributos-de-um-link-de-pagamento-existente"
+ },
+ {
+  "family": "cobrancas",
+  "method": "PUT",
+  "path": "/v1/charge/:id/cancel",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/link-de-pagamento#cancelar-um-link-de-pagamento-existente"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/charge/:id/history",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/link-de-pagamento#acrescentar-descrição-ao-histórico-de-uma-transação"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/charge/:id/link/resend",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/link-de-pagamento#reenviar-link-de-pagamento-por-e-mail"
+ },
+ {
+  "family": "cobrancas",
+  "method": "GET",
+  "path": "/v1/notification/:token",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/notificacoes#conhecendo-mais-sobre-o-fluxo-de-notificações"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/charge/one-step",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/split-de-pagamento#criação-de-transação-split-de-pagamento-em-one-step-um-passo"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/charge",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/split-de-pagamento#1-criar-transação"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/charge/:id/pay",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/split-de-pagamento#2-associar-à-forma-de-pagamento-via-boleto"
+ },
+ {
+  "family": "cobrancas",
+  "method": "GET",
+  "path": "/v1/charge/:id",
+  "scope": null,
+  "doc": "https://dev.efipay.com.br/docs/api-cobrancas/split-de-pagamento#retornar-informações-de-transação-existente"
+ },
+ {
+  "family": "extratos",
+  "method": "GET",
+  "path": "/v1/extrato-cnab/arquivos",
+  "scope": "gn.cnab-statement.statement.read",
+  "doc": "https://dev.efipay.com.br/docs/api-extratos/extratos#consultar-arquivos-gerados"
+ },
+ {
+  "family": "extratos",
+  "method": "GET",
+  "path": "/v1/extrato-cnab/download/:nome_arquivo",
+  "scope": "gn.cnab-statement.statement.read",
+  "doc": "https://dev.efipay.com.br/docs/api-extratos/extratos#solicitar-download-do-extrato"
+ },
+ {
+  "family": "extratos",
+  "method": "GET",
+  "path": "/v1/extrato-cnab/agendamentos",
+  "scope": "gn.cnab-statement.statement.read",
+  "doc": "https://dev.efipay.com.br/docs/api-extratos/extratos#consultar-recorrências-cadastradas"
+ },
+ {
+  "family": "extratos",
+  "method": "POST",
+  "path": "/v1/extrato-cnab/agendar",
+  "scope": "gn.cnab-statement.statement.write",
+  "doc": "https://dev.efipay.com.br/docs/api-extratos/extratos#criar-recorrência"
+ },
+ {
+  "family": "extratos",
+  "method": "PATCH",
+  "path": "/v1/extrato-cnab/agendar/:identificador",
+  "scope": "gn.cnab-statement.statement.write",
+  "doc": "https://dev.efipay.com.br/docs/api-extratos/extratos#revisar-recorrência"
+ },
+ {
+  "family": "extratos",
+  "method": "POST",
+  "path": "/v1/extrato-cnab/gerar-chaves",
+  "scope": "gn.cnab-statement.keys.write",
+  "doc": "https://dev.efipay.com.br/docs/api-extratos/extratos#gerar-chave"
+ },
+ {
+  "family": "open-finance",
+  "method": "PUT",
+  "path": "/v1/config",
+  "scope": "gn.opb.config.write",
+  "doc": "https://dev.efipay.com.br/docs/api-open-finance/configuracoes-de-aplicacao#configurar-urls-da-aplicação"
+ },
+ {
+  "family": "open-finance",
+  "method": "GET",
+  "path": "/v1/config",
+  "scope": "gn.opb.config.read",
+  "doc": "https://dev.efipay.com.br/docs/api-open-finance/configuracoes-de-aplicacao#retornar-as-configurações-da-aplicação"
+ },
+ {
+  "family": "open-finance",
+  "method": "POST",
+  "path": "/v1/pagamentos-agendados/pix",
+  "scope": "gn.opb.payment.pix.send",
+  "doc": "https://dev.efipay.com.br/docs/api-open-finance/pagamentos-agendados#solicitar-iniciação-de-pix-agendado-via-open-finance"
+ },
+ {
+  "family": "open-finance",
+  "method": "GET",
+  "path": "/v1/pagamentos-agendados/pix",
+  "scope": "gn.opb.payment.pix.read",
+  "doc": "https://dev.efipay.com.br/docs/api-open-finance/pagamentos-agendados#listar-pagamentos-agendados-por-um-determinado-período"
+ },
+ {
+  "family": "open-finance",
+  "method": "PATCH",
+  "path": "/v1/pagamentos-agendados/pix/:identificadorPagamento/cancelar",
+  "scope": "gn.opb.payment.pix.cancel",
+  "doc": "https://dev.efipay.com.br/docs/api-open-finance/pagamentos-agendados#cancelar-um-pagamento-agendado"
+ },
+ {
+  "family": "open-finance",
+  "method": "POST",
+  "path": "/v1/pagamentos-agendados/pix/:identificadorPagamento/devolver",
+  "scope": "gn.opb.payment.pix.refund",
+  "doc": "https://dev.efipay.com.br/docs/api-open-finance/pagamentos-agendados#efetuar-uma-devolução-de-um-pagamento-agendado"
+ },
+ {
+  "family": "open-finance",
+  "method": "POST",
+  "path": "/v1/pagamentos-automaticos/adesao",
+  "scope": "gn.opb.automatic.consent.write",
+  "doc": "https://dev.efipay.com.br/docs/api-open-finance/pagamentos-automaticos#solicitar-criação-de-uma-adesão-para-um-pagamento-automático"
+ },
+ {
+  "family": "open-finance",
+  "method": "GET",
+  "path": "/v1/pagamentos-automaticos/adesao",
+  "scope": "gn.opb.automatic.consent.read",
+  "doc": "https://dev.efipay.com.br/docs/api-open-finance/pagamentos-automaticos#consultar-os-parâmetros-de-uma-adesão"
+ },
+ {
+  "family": "open-finance",
+  "method": "PATCH",
+  "path": "/v1/pagamentos-automaticos/adesao",
+  "scope": "gn.opb.automatic.consent.write",
+  "doc": "https://dev.efipay.com.br/docs/api-open-finance/pagamentos-automaticos#editar-uma-adesão"
+ },
+ {
+  "family": "open-finance",
+  "method": "POST",
+  "path": "/v1/pagamentos-automaticos/pix",
+  "scope": "gn.opb.automatic.payment.write",
+  "doc": "https://dev.efipay.com.br/docs/api-open-finance/pagamentos-automaticos#solicitar-criação-de-um-pagamento-automatico"
+ },
+ {
+  "family": "open-finance",
+  "method": "GET",
+  "path": "/v1/pagamentos-automaticos/pix",
+  "scope": "gn.opb.automatic.payment.read",
+  "doc": "https://dev.efipay.com.br/docs/api-open-finance/pagamentos-automaticos#consultar-pagamentos-automaticos"
+ },
+ {
+  "family": "open-finance",
+  "method": "PATCH",
+  "path": "/v1/pagamentos-automaticos/pix",
+  "scope": "gn.opb.automatic.payment.write",
+  "doc": "https://dev.efipay.com.br/docs/api-open-finance/pagamentos-automaticos#solicitar-o-cancelamento-de-um-pagamento-automatico"
+ },
+ {
+  "family": "open-finance",
+  "method": "POST",
+  "path": "/v1/pagamentos/pix",
+  "scope": "gn.opb.payment.pix.send",
+  "doc": "https://dev.efipay.com.br/docs/api-open-finance/pagamentos-imediatos#solicitar-iniciação-de-pix-via-open-finance"
+ },
+ {
+  "family": "open-finance",
+  "method": "GET",
+  "path": "/v1/pagamentos/pix",
+  "scope": "gn.opb.payment.pix.read",
+  "doc": "https://dev.efipay.com.br/docs/api-open-finance/pagamentos-imediatos#listar-pagamentos-por-um-determinado-período"
+ },
+ {
+  "family": "open-finance",
+  "method": "POST",
+  "path": "/v1/pagamentos/pix/:identificadorPagamento/devolver",
+  "scope": "gn.opb.payment.pix.refund",
+  "doc": "https://dev.efipay.com.br/docs/api-open-finance/pagamentos-imediatos#efetuar-uma-devolução-de-um-pagamento"
+ },
+ {
+  "family": "open-finance",
+  "method": "POST",
+  "path": "/v1/pagamentos-biometria/vinculos",
+  "scope": "gn.opb.jwr.enrollment.write",
+  "doc": "https://dev.efipay.com.br/docs/api-open-finance/pagamentos-por-biometria#criar-vínculo"
+ },
+ {
+  "family": "open-finance",
+  "method": "GET",
+  "path": "/v1/pagamentos-biometria/vinculos",
+  "scope": "gn.opb.jwr.enrollment.read",
+  "doc": "https://dev.efipay.com.br/docs/api-open-finance/pagamentos-por-biometria#consultar-vínculos-de-um-usuário"
+ },
+ {
+  "family": "open-finance",
+  "method": "PATCH",
+  "path": "/v1/pagamentos-biometria/vinculos",
+  "scope": "gn.opb.jwr.enrollment.write",
+  "doc": "https://dev.efipay.com.br/docs/api-open-finance/pagamentos-por-biometria#revogar-vínculo"
+ },
+ {
+  "family": "open-finance",
+  "method": "POST",
+  "path": "/v1/pagamentos-biometria/pix",
+  "scope": "gn.opb.jwr.payment.write",
+  "doc": "https://dev.efipay.com.br/docs/api-open-finance/pagamentos-por-biometria#criar-pagamento-via-jornada-sem-redirecionamento"
+ },
+ {
+  "family": "open-finance",
+  "method": "GET",
+  "path": "/v1/pagamentos-biometria/pix",
+  "scope": "gn.opb.jwr.payment.read",
+  "doc": "https://dev.efipay.com.br/docs/api-open-finance/pagamentos-por-biometria#consultar-pagamentos-feitos-via-jornada-sem-redirecionamento"
+ },
+ {
+  "family": "open-finance",
+  "method": "POST",
+  "path": "/v1/pagamentos-recorrentes/pix",
+  "scope": "gn.opb.payment.pix.send",
+  "doc": "https://dev.efipay.com.br/docs/api-open-finance/pagamentos-recorrentes#solicitar-iniciação-de-pix-recorrente-via-open-finance"
+ },
+ {
+  "family": "open-finance",
+  "method": "GET",
+  "path": "/v1/pagamentos-recorrentes/pix",
+  "scope": "gn.opb.payment.pix.read",
+  "doc": "https://dev.efipay.com.br/docs/api-open-finance/pagamentos-recorrentes#listar-pagamentos-recorrentes-por-um-determinado-período"
+ },
+ {
+  "family": "open-finance",
+  "method": "PATCH",
+  "path": "/v1/pagamentos-recorrentes/pix/:identificadorPagamento/cancelar",
+  "scope": "gn.opb.payment.pix.cancel",
+  "doc": "https://dev.efipay.com.br/docs/api-open-finance/pagamentos-recorrentes#cancelar-um-pagamento-recorrente"
+ },
+ {
+  "family": "open-finance",
+  "method": "POST",
+  "path": "/v1/pagamentos-recorrentes/pix/:identificadorPagamento/devolver",
+  "scope": "gn.opb.payment.pix.refund",
+  "doc": "https://dev.efipay.com.br/docs/api-open-finance/pagamentos-recorrentes#efetuar-uma-devolução-de-um-pagamento-recorrente"
+ },
+ {
+  "family": "open-finance",
+  "method": "PATCH",
+  "path": "/v1/pagamentos-recorrentes/pix/:identificadorPagamento/substituir/:endToEndId",
+  "scope": "gn.opb.payment.pix.send",
+  "doc": "https://dev.efipay.com.br/docs/api-open-finance/pagamentos-recorrentes#substituir-parcela-de-pagamento-recorrente"
+ },
+ {
+  "family": "open-finance",
+  "method": "GET",
+  "path": "/v1/participantes",
+  "scope": "gn.opb.participants.read",
+  "doc": "https://dev.efipay.com.br/docs/api-open-finance/participantes#recuperar-as-instituições-participantes-do-open-finance"
+ },
+ {
+  "family": "pagamento-de-contas",
+  "method": "GET",
+  "path": "/v1/codBarras/:codBarras",
+  "scope": "gn.barcode.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pagamento-de-contas/pagamentos#detalhar-código-de-barras-para-pagamento"
+ },
+ {
+  "family": "pagamento-de-contas",
+  "method": "POST",
+  "path": "/v1/codBarras/:codBarras",
+  "scope": "gn.barcode.pay.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pagamento-de-contas/pagamentos#solicitar-pagamento-de-código-de-barras"
+ },
+ {
+  "family": "pagamento-de-contas",
+  "method": "GET",
+  "path": "/v1/:idPagamento",
+  "scope": "gn.barcode.pay.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pagamento-de-contas/pagamentos#consultar-solicitação-de-pagamento"
+ },
+ {
+  "family": "pagamento-de-contas",
+  "method": "GET",
+  "path": "/v1/resumo",
+  "scope": "gn.barcode.pay.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pagamento-de-contas/pagamentos#consultar-resumo-de-solicitações-de-pagamento"
+ },
+ {
+  "family": "pagamento-de-contas",
+  "method": "PUT",
+  "path": "/v1/webhook",
+  "scope": "payment.webhook.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pagamento-de-contas/webhooks#criar-webhook-de-pagamento"
+ },
+ {
+  "family": "pagamento-de-contas",
+  "method": "GET",
+  "path": "/v1/webhook",
+  "scope": "payment.webhook.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pagamento-de-contas/webhooks#listar-webhooks-de-pagamento"
+ },
+ {
+  "family": "pagamento-de-contas",
+  "method": "DELETE",
+  "path": "/v1/webhook",
+  "scope": "payment.webhook.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pagamento-de-contas/webhooks#deletar-webhook-de-pagamento"
+ },
+ {
+  "family": "pix",
+  "method": "PUT",
+  "path": "/v2/cobv/:txid",
+  "scope": "cobv.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/cobrancas-com-vencimento#criar-cobrança-com-vencimento"
+ },
+ {
+  "family": "pix",
+  "method": "PATCH",
+  "path": "/v2/cobv/:txid",
+  "scope": "cobv.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/cobrancas-com-vencimento#revisar-cobrança-com-vencimento"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/cobv/:txid",
+  "scope": "cobv.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/cobrancas-com-vencimento#consultar-cobrança-com-vencimento"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/cobv",
+  "scope": "cobv.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/cobrancas-com-vencimento#consultar-lista-de-cobranças-com-vencimento"
+ },
+ {
+  "family": "pix",
+  "method": "POST",
+  "path": "/v2/cob",
+  "scope": "cob.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/cobrancas-imediatas#criar-cobrança-imediata-sem-txid"
+ },
+ {
+  "family": "pix",
+  "method": "PUT",
+  "path": "/v2/cob/:txid",
+  "scope": "cob.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/cobrancas-imediatas#criar-cobrança-imediata-com-txid"
+ },
+ {
+  "family": "pix",
+  "method": "PATCH",
+  "path": "/v2/cob/:txid",
+  "scope": "cob.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/cobrancas-imediatas#revisar-cobrança"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/cob/:txid",
+  "scope": "cob.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/cobrancas-imediatas#consultar-cobrança"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/cob",
+  "scope": "cob.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/cobrancas-imediatas#consultar-lista-de-cobranças"
+ },
+ {
+  "family": "pix",
+  "method": "PUT",
+  "path": "/v2/lotecobv/:id",
+  "scope": "lotecobv.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/cobrancas-lote#criaralterar-lote-de-cobranças-com-vencimento"
+ },
+ {
+  "family": "pix",
+  "method": "PATCH",
+  "path": "/v2/lotecobv/:id",
+  "scope": "lotecobv.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/cobrancas-lote#revisar-cobranças-específicas-de-um-lote"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/lotecobv/:id",
+  "scope": "lotecobv.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/cobrancas-lote#consultar-lote-de-cobranças-com-vencimento"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/lotecobv",
+  "scope": "lotecobv.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/cobrancas-lote#consultar-lista-de-lotes-de-cobranças-com-vencimento"
+ },
+ {
+  "family": "pix",
+  "method": "POST",
+  "path": "/v2/gn/evp",
+  "scope": "gn.pix.evp.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/endpoints-exclusivos-efi#criar-chave-pix-aleatória"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/gn/evp",
+  "scope": "gn.pix.evp.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/endpoints-exclusivos-efi#listar-chaves-pix-aleatórias"
+ },
+ {
+  "family": "pix",
+  "method": "DELETE",
+  "path": "/v2/gn/evp/:chave",
+  "scope": "gn.pix.evp.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/endpoints-exclusivos-efi#remover-chave-pix-aleatória"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/gn/saldo/",
+  "scope": "gn.balance.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/endpoints-exclusivos-efi#buscar-o-saldo-da-conta"
+ },
+ {
+  "family": "pix",
+  "method": "PUT",
+  "path": "/v2/gn/config",
+  "scope": "gn.settings.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/endpoints-exclusivos-efi#criarmodificar-configurações-da-conta"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/gn/config",
+  "scope": "gn.settings.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/endpoints-exclusivos-efi#listar-configurações-da-conta"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/gn/pix/comprovantes",
+  "scope": "gn.receipts.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/endpoints-exclusivos-efi#obter-comprovantes"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/gn/infracoes",
+  "scope": "gn.infractions.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/endpoints-exclusivos-efi#listar-infrações-med-da-conta"
+ },
+ {
+  "family": "pix",
+  "method": "POST",
+  "path": "/v2/gn/infracoes/:idInfracao/defesa",
+  "scope": "gn.infractions.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/endpoints-exclusivos-efi#submeter-defesa-de-infração-med"
+ },
+ {
+  "family": "pix",
+  "method": "POST",
+  "path": "/v2/gn/relatorios/extrato-conciliacao",
+  "scope": "gn.reports.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/endpoints-exclusivos-efi#requisitar-extrato-conciliação-pix"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/gn/relatorios/:id",
+  "scope": "gn.reports.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/endpoints-exclusivos-efi#solicitar-download-extrato-conciliação"
+ },
+ {
+  "family": "pix",
+  "method": "PUT",
+  "path": "/v3/gn/pix/:idEnvio",
+  "scope": "pix.send",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/envio-pagamento-pix#requisitar-envio-de-pix"
+ },
+ {
+  "family": "pix",
+  "method": "PUT",
+  "path": "/v2/gn/pix/:idEnvio/mesma-titularidade",
+  "scope": "gn.pix.sameownership.send",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/envio-pagamento-pix#requisitar-envio-de-pix-para-contas-de-mesma-titularidade"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/gn/pix/enviados/:e2eId",
+  "scope": "gn.pix.send.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/envio-pagamento-pix#consultar-pix-enviado-através-do-endtoendid"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/gn/pix/enviados/id-envio/:idEnvio",
+  "scope": "gn.pix.send.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/envio-pagamento-pix#consultar-pix-enviado-através-do-identificador-da-transação"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/gn/pix/enviados",
+  "scope": "gn.pix.send.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/envio-pagamento-pix#consultar-lista-de-pix-enviados"
+ },
+ {
+  "family": "pix",
+  "method": "PUT",
+  "path": "/v2/gn/pix/:idEnvio/qrcode",
+  "scope": "gn.qrcodes.pay",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/envio-pagamento-pix#pagar-qr-code-pix"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/pix/:e2eId",
+  "scope": "pix.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/gestao-de-pix#consultar-pix-recebido"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/pix",
+  "scope": "pix.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/gestao-de-pix#consultar-lista-de-pix-recebidos"
+ },
+ {
+  "family": "pix",
+  "method": "PUT",
+  "path": "/v2/pix/:e2eId/devolucao/:id",
+  "scope": "pix.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/gestao-de-pix#solicitar-devolução"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/pix/:e2eId/devolucao/:id",
+  "scope": "pix.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/gestao-de-pix#consultar-devolução"
+ },
+ {
+  "family": "pix",
+  "method": "POST",
+  "path": "/v2/loc",
+  "scope": "payloadlocation.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/payload-locations#criar-location-do-payload"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/loc",
+  "scope": "payloadlocation.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/payload-locations#consultar-locations-cadastradas"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/loc/:id",
+  "scope": "payloadlocation.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/payload-locations#recuperar-location-do-payload"
+ },
+ {
+  "family": "pix",
+  "method": "DELETE",
+  "path": "/v2/loc/:id/txid",
+  "scope": "payloadlocation.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/payload-locations#desvincular-um-txid-de-um-location"
+ },
+ {
+  "family": "pix",
+  "method": "POST",
+  "path": "/v2/locrec",
+  "scope": "payloadlocationrec.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/payload-locations#criar-location-do-payload-de-recorrência-de-pix-automático"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/locrec",
+  "scope": "payloadlocationrec.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/payload-locations#consultar-locations-de-recorrência-de-pix-automático-cadastradas"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/locrec/:id",
+  "scope": "payloadlocationrec.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/payload-locations#recuperar-location-do-payload-de-recorrência-de-pix-automático"
+ },
+ {
+  "family": "pix",
+  "method": "DELETE",
+  "path": "/v2/locrec/:id/idRec",
+  "scope": "payloadlocationrec.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/payload-locations#desvincular-uma-recorrência-de-pix-automático-de-um-location"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/loc/:id/qrcode",
+  "scope": "payloadlocation.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/payload-locations#gerar-qr-code-de-um-location"
+ },
+ {
+  "family": "pix",
+  "method": "POST",
+  "path": "/v2/rec",
+  "scope": "rec.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/pix-automatico#criar-recorrência-de-pix-automático"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/rec/:idRec",
+  "scope": "rec.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/pix-automatico#consultar-recorrência-de-pix-automático"
+ },
+ {
+  "family": "pix",
+  "method": "PATCH",
+  "path": "/v2/rec/:idRec",
+  "scope": "rec.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/pix-automatico#revisar-recorrência-de-pix-automático"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/rec",
+  "scope": "rec.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/pix-automatico#consultar-lista-de-recorrências-de-pix-automático"
+ },
+ {
+  "family": "pix",
+  "method": "POST",
+  "path": "/v2/solicrec",
+  "scope": "solicrec.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/pix-automatico#criar-solicitação-de-confirmação-de-recorrência-de-pix-automático"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/solicrec/:idSolicRec",
+  "scope": "solicrec.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/pix-automatico#consultar-solicitação-de-confirmação-de-recorrência-de-pix-automático"
+ },
+ {
+  "family": "pix",
+  "method": "PATCH",
+  "path": "/v2/solicrec/:idSolicRec",
+  "scope": "solicrec.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/pix-automatico#revisar-solicitação-de-confirmação-de-recorrência-de-pix-automático"
+ },
+ {
+  "family": "pix",
+  "method": "PUT",
+  "path": "/v2/cobr/:txid",
+  "scope": "cobr.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/pix-automatico#criar-cobrança-de-pix-automático-com-txid"
+ },
+ {
+  "family": "pix",
+  "method": "PATCH",
+  "path": "/v2/cobr/:txid",
+  "scope": "cobr.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/pix-automatico#revisar-cobrança-de-pix-automático"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/cobr/:txid",
+  "scope": "cobr.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/pix-automatico#consultar-cobrança-de-pix-automático"
+ },
+ {
+  "family": "pix",
+  "method": "POST",
+  "path": "/v2/cobr",
+  "scope": "cobr.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/pix-automatico#criar-cobrança-de-pix-automático-sem-txid"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/cobr",
+  "scope": "cobr.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/pix-automatico#consultar-lista-de-cobranças-de-pix-automático"
+ },
+ {
+  "family": "pix",
+  "method": "POST",
+  "path": "/v2/cobr/:txid/retentativa/:data",
+  "scope": "cobr.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/pix-automatico#solicitar-retentativa-de-pix-automático"
+ },
+ {
+  "family": "pix",
+  "method": "POST",
+  "path": "/v2/gn/split/config",
+  "scope": "gn.split.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/split-de-pagamento-pix#configuração-de-um-split-de-pagamento-sem-passar-id"
+ },
+ {
+  "family": "pix",
+  "method": "PUT",
+  "path": "/v2/gn/split/config/:id",
+  "scope": "gn.split.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/split-de-pagamento-pix#configuração-de-um-split-de-pagamento-com-id"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/gn/split/config/:id",
+  "scope": "gn.split.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/split-de-pagamento-pix#consultar-configuração-do-split-por-id"
+ },
+ {
+  "family": "pix",
+  "method": "PUT",
+  "path": "/v2/cob/:txid",
+  "scope": "cob.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/split-de-pagamento-pix#criar-uma-cobrança"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/gn/split/cob/:txid",
+  "scope": "gn.split.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/split-de-pagamento-pix#consultar-cobrança-com-split-de-pagamento-por-txid"
+ },
+ {
+  "family": "pix",
+  "method": "DELETE",
+  "path": "/v2/gn/split/cob/:txid/vinculo",
+  "scope": "gn.split.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/split-de-pagamento-pix#deletar-o-vínculo-entre-um-split-de-pagamento-e-uma-cobrança"
+ },
+ {
+  "family": "pix",
+  "method": "PUT",
+  "path": "/v2/cobv/:txid",
+  "scope": "cob.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/split-de-pagamento-pix#criar-uma-cobrança-com-vencimento"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/gn/split/cobv/:txid",
+  "scope": "gn.split.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/split-de-pagamento-pix#consultar-cobrança-com-vencimento-e-com-split-de-pagamento-por-txid"
+ },
+ {
+  "family": "pix",
+  "method": "PUT",
+  "path": "/v2/gn/split/pix/:e2eid/devolucao/:id",
+  "scope": "gn.pix.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/split-de-pagamento-pix#solicitar-devolução-de-uma-cobrança-pix-com-split-de-pagamento"
+ },
+ {
+  "family": "pix",
+  "method": "DELETE",
+  "path": "/v2/gn/split/cobv/:txid/vinculo",
+  "scope": "gn.split.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/split-de-pagamento-pix#deletar-o-vínculo-entre-um-split-de-pagamento-e-uma-cobrança-com-vencimento"
+ },
+ {
+  "family": "pix",
+  "method": "PUT",
+  "path": "/v2/webhook/:chave",
+  "scope": "webhook.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/webhooks#configurar-o-webhook-pix"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/webhook/:chave",
+  "scope": "webhook.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/webhooks#exibir-informações-do-webhook-pix"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/webhook",
+  "scope": "webhook.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/webhooks#consultar-lista-de-webhooks"
+ },
+ {
+  "family": "pix",
+  "method": "DELETE",
+  "path": "/v2/webhook/:chave",
+  "scope": "webhook.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/webhooks#cancelar-o-webhook-pix"
+ },
+ {
+  "family": "pix",
+  "method": "PUT",
+  "path": "/v2/webhookrec",
+  "scope": "webhookrec.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/webhooks#configurar-o-webhook-de-recorrência-de-pix-automático"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/webhookrec",
+  "scope": "webhookrec.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/webhooks#exibir-informações-do-webhook-de-recorrência-de-pix-automático"
+ },
+ {
+  "family": "pix",
+  "method": "DELETE",
+  "path": "/v2/webhookrec",
+  "scope": "webhookrec.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/webhooks#cancelar-o-webhook-de-recorrência-de-pix-automático"
+ },
+ {
+  "family": "pix",
+  "method": "PUT",
+  "path": "/v2/webhookcobr",
+  "scope": "webhookcobr.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/webhooks#configurar-o-webhook-de-cobrança-de-pix-automático"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/webhookcobr",
+  "scope": "webhookcobr.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/webhooks#exibir-informações-do-webhook-de-cobrança-de-pix-automático"
+ },
+ {
+  "family": "pix",
+  "method": "DELETE",
+  "path": "/v2/webhookcobr",
+  "scope": "webhookcobr.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/webhooks#cancelar-o-webhook-de-cobrança-de-pix-automático"
+ },
+ {
+  "family": "pix",
+  "method": "POST",
+  "path": "/v2/gn/webhook/reenviar",
+  "scope": "webhook.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/webhooks#reenviar-webhook-pix"
+ },
+ {
+  "family": "pix",
+  "method": "GET",
+  "path": "/v2/gn/chaves/balde",
+  "scope": null,
+  "doc": null,
+  "note": "fora da extração automática da doc; conferir na página"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v2/charge/card",
+  "scope": null,
+  "doc": null,
+  "note": "fora da extração automática da doc; conferir na página"
+ },
+ {
+  "family": "pix",
+  "method": "PUT",
+  "path": "/v2/gn/split/cob/:txid/vinculo/:splitConfigId",
+  "scope": null,
+  "doc": null,
+  "note": "fora da extração automática da doc; conferir na página"
+ },
+ {
+  "family": "pix",
+  "method": "PUT",
+  "path": "/v2/gn/split/cobv/:txid/vinculo/:splitConfigId",
+  "scope": null,
+  "doc": null,
+  "note": "fora da extração automática da doc; conferir na página"
+ },
+ {
+  "family": "pix",
+  "method": "POST",
+  "path": "/v2/gn/qrcodes/detalhar",
+  "scope": null,
+  "doc": null,
+  "note": "fora da extração automática da doc; conferir na página"
+ }
+]

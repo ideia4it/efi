@@ -173,7 +173,7 @@ defmodule Efi.Charges.Carnet do
 
   `PUT /v1/carnet/:id/settle`
 
-  [Documentação da Efí](https://dev.efipay.com.br/docs/api-cobrancas/carne#marcar-como-pago-baixa-manual-um-determinado-carnê)
+  [Documentação da Efí](https://dev.efipay.com.br/docs/api-cobrancas/carne#2-por-meio-de-requisição-via-api)
   """
   @spec settle(Client.t(), carnet_id(), keyword()) :: Efi.result()
   def settle(%Client{} = client, carnet_id, opts \\ []) do

@@ -43,7 +43,7 @@ defmodule Efi.DocumentationTest do
     assert missing == []
   end
 
-  test "every API function names the scope and the documentation page the inventory has for its route" do
+  test "every API function names the scope and the documentation section the inventory has for its route" do
     inventory =
       Documentation.inventory()
       |> Enum.reject(& &1["skip"])
@@ -54,7 +54,7 @@ defmodule Efi.DocumentationTest do
           {function, text} <- Documentation.function_docs(module),
           [route] = Documentation.routes(text),
           entries = Map.get(inventory, route, []),
-          problem <- [scope_problem(text, entries), page_problem(text, entries)],
+          problem <- [scope_problem(text, entries), section_problem(text, entries)],
           problem != nil,
           do: {function, problem}
 
@@ -114,18 +114,17 @@ defmodule Efi.DocumentationTest do
     end
   end
 
-  # A âncora ainda não é comparada: Efi.Charges.Carnet.settle/3 e Efi.Charges.Notification.get/3
-  # apontam para a seção pai da que o inventário registra.
-  defp page_problem(text, entries) do
-    documented = text |> Documentation.links() |> Enum.map(&page/1)
+  defp section_problem(text, entries) do
+    documented = Documentation.links(text)
 
-    case entries |> Enum.map(& &1["doc"]) |> Enum.reject(&is_nil/1) |> Enum.map(&page/1) do
-      [] -> nil
-      pages -> if Enum.all?(documented, &(&1 not in pages)), do: {:page, documented, pages}
+    case entries |> Enum.map(& &1["doc"]) |> Enum.reject(&is_nil/1) do
+      [] ->
+        nil
+
+      sections ->
+        if Enum.all?(documented, &(&1 not in sections)), do: {:section, documented, sections}
     end
   end
-
-  defp page(url), do: url |> URI.parse() |> Map.put(:fragment, nil) |> URI.to_string()
 
   defp host(module) do
     ["Efi", namespace | _rest] = Module.split(module)

@@ -44,7 +44,7 @@ defmodule Efi.Charges.Notification do
 
   `GET /v1/notification/:token`
 
-  [Documentação da Efí](https://dev.efipay.com.br/docs/api-cobrancas/notificacoes#consultando-detalhes-de-uma-notificação)
+  [Documentação da Efí](https://dev.efipay.com.br/docs/api-cobrancas/notificacoes#conhecendo-mais-sobre-o-fluxo-de-notificações)
   """
   @spec get(Client.t(), String.t(), keyword()) :: Efi.result()
   def get(%Client{} = client, token, opts \\ []) do

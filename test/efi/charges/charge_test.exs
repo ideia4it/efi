@@ -9,7 +9,7 @@ defmodule Efi.Charges.ChargeTest do
   @customer %{"name" => "Cliente do Studio Ana", "cpf" => "12345678909"}
 
   test "issues a balance sheet boleto in two steps, reschedules and resends it, then settles it by hand" do
-    client = Efi.Test.client(certificate: nil)
+    client = Efi.Test.client(certificate: nil, partner_token: "parceiro-studio-ana")
 
     balance_sheet = %{
       "title" => "Demonstrativo de novembro",
@@ -24,6 +24,7 @@ defmodule Efi.Charges.ChargeTest do
 
     Efi.Test.expect(:post, "#{@host}/v1/charge", fn conn, body ->
       assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer token-de-teste"]
+      assert Plug.Conn.get_req_header(conn, "partner-token") == ["parceiro-studio-ana"]
       assert body == %{"items" => [%{"name" => "Corte", "value" => 8900, "amount" => 1}]}
 
       Req.Test.json(conn, %{

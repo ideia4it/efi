@@ -7,7 +7,7 @@ defmodule Efi.Charges.CarnetTest do
 
   @host "cobrancas-h.api.efipay.com.br"
 
-  test "issues a carnet, moves and resends one parcel, settles another by hand and cancels the last" do
+  test "issues a carnet, moves and resends one parcel, settles another by hand, can no longer move it and cancels the last" do
     client = Efi.Test.client(certificate: nil)
 
     carnet = %{
@@ -55,6 +55,19 @@ defmodule Efi.Charges.CarnetTest do
       Req.Test.json(conn, %{"code" => 200})
     end)
 
+    Efi.Test.expect(:put, "#{@host}/v1/carnet/4004/parcels", fn conn, body ->
+      assert body == %{"parcels" => [%{"parcel" => 1, "expire_at" => "2027-02-10"}]}
+
+      conn
+      |> Plug.Conn.put_status(400)
+      |> Req.Test.json(%{
+        "code" => 3_500_101,
+        "error" => "update_parcels",
+        "error_description" =>
+          "Apenas transações com status [waiting] ou [unpaid] podem ser atualizadas. Parcela: [1]."
+      })
+    end)
+
     Efi.Test.expect(:put, "#{@host}/v1/carnet/4004/parcel/3/cancel", fn conn, body ->
       assert body == nil
       Req.Test.json(conn, %{"code" => 200})
@@ -94,6 +107,13 @@ defmodule Efi.Charges.CarnetTest do
              Carnet.resend_parcel(client, 4004, 2, %{"email" => "cliente@app.example.com"})
 
     assert {:ok, %{"code" => 200}} = Carnet.settle_parcel(client, 4004, 1)
+
+    assert {:error, %Efi.Error{kind: :validation, name: "update_parcels", message: message}} =
+             Carnet.update_parcels_due_dates(client, 4004, %{
+               "parcels" => [%{"parcel" => 1, "expire_at" => "2027-02-10"}]
+             })
+
+    assert message =~ "Apenas transações com status [waiting] ou [unpaid]"
     assert {:ok, %{"code" => 200}} = Carnet.cancel_parcel(client, 4004, 3)
 
     assert {:ok, %{"code" => 200}} =

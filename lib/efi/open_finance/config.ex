@@ -3,8 +3,8 @@ defmodule Efi.OpenFinance.Config do
   Configuração da aplicação na API Open Finance: para onde o pagador volta depois de autorizar
   no banco e para onde a Efí manda as notificações.
 
-  Configure antes do primeiro pagamento. Sem `redirectURL`, o pagador não tem para onde voltar;
-  sem `webhookURL`, o app só descobre o resultado consultando a lista de pagamentos.
+  Configure antes do primeiro pagamento. `redirectURL` e `webhookURL` são obrigatórios: sem um
+  deles, a Efí recusa com 400 (`redirect_url_obrigatorio` ou `webhook_url_obrigatorio`).
 
       {:ok, _settings} =
         Efi.OpenFinance.Config.update(client, %{
@@ -18,7 +18,8 @@ defmodule Efi.OpenFinance.Config do
   mande todos os campos a cada chamada.
 
     * `"webhookSecurity"` - `%{"type" => "mtls"}` (padrão) exige que o servidor do webhook
-      valide o certificado da Efí; `%{"type" => "hmac", "hash" => ...}` faz a Efí acrescentar
+      valide o certificado da Efí, e a Efí testa o handshake já no `update/3`: se falhar, volta
+      422 `webhook_url_invalido`; `%{"type" => "hmac", "hash" => ...}` faz a Efí acrescentar
       `?hmac=<hash>` à URL de cada notificação, e o app confere o valor;
     * `"processPayment"` - `"sync"` (padrão) mostra a tela da Efí durante o redirecionamento;
       `"async"` pula essa tela, e o resultado só chega pelo webhook ou pela consulta;

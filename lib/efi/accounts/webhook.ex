@@ -21,12 +21,12 @@ defmodule Efi.Accounts.Webhook do
   400 e um `name` como `"mtls_nao_configurado"`, `"url_inacessivel"` ou `"url_cadastrada"`.
 
   Atrás de um proxy que encerra o TLS (Fly.io, Heroku, Render), o app nunca vê o certificado
-  da Efí e o teste falha. No webhook Pix, os SDKs oficiais contornam isso com
-  `skip_mtls_checking: true` (header `x-skip-mtls-checking`), mas a doc da Abertura de Contas
-  não cita o header: confirme na homologação se esta API o aceita e, se aceitar, proteja a URL
-  de outra forma. O app também pode não depender da notificação e consultar
-  `Efi.Accounts.SimplifiedAccount.get_credentials/3` até a conta abrir, mas um webhook
-  cadastrado continua obrigatório para pedir a abertura.
+  da Efí e o teste falha. A doc da Abertura de Contas não cita o header `x-skip-mtls-checking`,
+  que `skip_mtls_checking: true` envia, mas o SDK oficial em Node o manda também neste
+  cadastro quando configurado com `validateMtls: false`. Confirme na homologação se esta API o
+  aceita e, se aceitar, proteja a URL de outra forma. O app também pode não depender da
+  notificação e consultar `Efi.Accounts.SimplifiedAccount.get_credentials/3` até a conta
+  abrir, mas um webhook cadastrado continua obrigatório para pedir a abertura.
 
   ## A notificação
 

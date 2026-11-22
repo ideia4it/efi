@@ -10,16 +10,29 @@ defmodule Efi.Accounts.WebhookTest do
   @webhook_url "https://app.example.com/efi/contas"
   @new_webhook_url "https://app.example.com/efi/abertura-de-contas"
 
-  test "registers the account webhook, moves it to a new url, finds it and then cancels it" do
+  test "registers the account webhook from behind a TLS-terminating proxy, moves it to a new url, finds it and then cancels it" do
     client = Efi.Test.client()
+
+    Efi.Test.expect(:post, "#{@host}/v1/webhook", fn conn, _body ->
+      assert Plug.Conn.get_req_header(conn, "x-skip-mtls-checking") == []
+
+      conn
+      |> Plug.Conn.put_status(400)
+      |> Req.Test.json(%{
+        "nome" => "mtls_nao_configurado",
+        "mensagem" => "A autenticação TLS mútua não está configurada no URL fornecido."
+      })
+    end)
 
     Efi.Test.expect(:post, "#{@host}/v1/webhook", fn conn, body ->
       assert body == %{"webhookUrl" => @webhook_url}
+      assert Plug.Conn.get_req_header(conn, "x-skip-mtls-checking") == ["true"]
       Req.Test.json(conn, %{"identificadorWebhook" => @webhook_id})
     end)
 
     Efi.Test.expect(:post, "#{@host}/v1/webhook", fn conn, body ->
       assert body == %{"url" => @new_webhook_url, "chave" => @webhook_id}
+      assert Plug.Conn.get_req_header(conn, "x-skip-mtls-checking") == ["true"]
       Req.Test.json(conn, %{"identificadorWebhook" => @webhook_id})
     end)
 
@@ -52,11 +65,16 @@ defmodule Efi.Accounts.WebhookTest do
       fn conn, _body -> Plug.Conn.send_resp(conn, 204, "") end
     )
 
-    assert {:ok, %{"identificadorWebhook" => @webhook_id}} =
+    assert {:error, %Efi.Error{kind: :validation, status: 400, name: "mtls_nao_configurado"}} =
              Webhook.configure(client, %{"webhookUrl" => @webhook_url})
 
     assert {:ok, %{"identificadorWebhook" => @webhook_id}} =
-             Webhook.configure(client, %{"url" => @new_webhook_url, "chave" => @webhook_id})
+             Webhook.configure(client, %{"webhookUrl" => @webhook_url}, skip_mtls_checking: true)
+
+    assert {:ok, %{"identificadorWebhook" => @webhook_id}} =
+             Webhook.configure(client, %{"url" => @new_webhook_url, "chave" => @webhook_id},
+               skip_mtls_checking: true
+             )
 
     assert {:ok, %{"webhookUrl" => @new_webhook_url}} = Webhook.get(client, @webhook_id)
 
@@ -67,5 +85,22 @@ defmodule Efi.Accounts.WebhookTest do
              })
 
     assert {:ok, nil} = Webhook.delete(client, @webhook_id)
+  end
+
+  test "reports an unknown webhook id as a validation error, because the Efí answers 400 and not 404" do
+    client = Efi.Test.client()
+
+    Efi.Test.expect(:get, "#{@host}/v1/webhook/#{@webhook_id}", fn conn, _body ->
+      conn
+      |> Plug.Conn.put_status(400)
+      |> Req.Test.json(%{
+        "nome" => "identificador_webhook",
+        "mensagem" =>
+          "Não foi possível encontrar um webhook com o identificador webhook informado."
+      })
+    end)
+
+    assert {:error, %Efi.Error{kind: :validation, status: 400, name: "identificador_webhook"}} =
+             Webhook.get(client, @webhook_id)
   end
 end

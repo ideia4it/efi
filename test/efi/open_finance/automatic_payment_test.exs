@@ -51,6 +51,7 @@ defmodule Efi.OpenFinance.AutomaticPaymentTest do
 
     Efi.Test.expect(:post, @enrollments_url, fn conn, body ->
       assert body == enrollment
+      assert Plug.Conn.get_req_header(conn, "x-idempotency-key") == []
 
       Req.Test.json(conn, %{
         "identificadorAdesao" => @enrollment_id,
@@ -95,6 +96,7 @@ defmodule Efi.OpenFinance.AutomaticPaymentTest do
 
     Efi.Test.expect(:patch, @payments_url, fn conn, body ->
       assert body == %{"identificadorAdesao" => @enrollment_id, "endToEndId" => @end_to_end_id}
+      assert Plug.Conn.get_req_header(conn, "x-idempotency-key") == []
 
       Req.Test.json(conn, %{
         "identificadorAdesao" => @enrollment_id,

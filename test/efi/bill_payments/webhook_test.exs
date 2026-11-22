@@ -13,6 +13,7 @@ defmodule Efi.BillPayments.WebhookTest do
 
     Efi.Test.expect(:put, "#{@host}/v1/webhook", fn conn, body ->
       assert body == %{"url" => @webhook_url}
+      assert Plug.Conn.get_req_header(conn, "x-skip-mtls-checking") == []
 
       conn
       |> Plug.Conn.put_status(201)

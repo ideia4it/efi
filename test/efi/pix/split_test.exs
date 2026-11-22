@@ -25,7 +25,7 @@ defmodule Efi.Pix.SplitTest do
     }
   }
 
-  test "gives the partner its share of an immediate charge, keeps the split once paid and refunds the payer from the business account" do
+  test "gives the partner its share of an immediate charge, keeps the split once paid and refunds the payer from the business account only once per refund id" do
     client = Efi.Test.client()
 
     Efi.Test.expect(:post, "pix-h.api.efipay.com.br/v2/gn/split/config", fn conn, body ->
@@ -105,6 +105,28 @@ defmodule Efi.Pix.SplitTest do
       end
     )
 
+    Efi.Test.expect(
+      :put,
+      "pix-h.api.efipay.com.br/v2/gn/split/pix/#{@e2e_id}/devolucao/devolucao0001",
+      fn conn, _body ->
+        conn
+        |> Plug.Conn.put_status(409)
+        |> Req.Test.json(%{
+          "type" => "https://pix.bcb.gov.br/api/v2/error/SplitDevolucaoOperacaoInvalida",
+          "title" => "Operação Inválida",
+          "status" => 409,
+          "detail" =>
+            "A requisição que busca solicitar uma devolução split não respeita o schema ou está semanticamente errada.",
+          "violacoes" => [
+            %{
+              "razao" => "Já existe uma devolução com o mesmo identificador para este pix.",
+              "propriedade" => "split.devolucao.params.id"
+            }
+          ]
+        })
+      end
+    )
+
     assert {:ok, %{"id" => @config_id, "status" => "ATIVA"}} =
              Split.create_config(client, @partner_share)
 
@@ -120,6 +142,9 @@ defmodule Efi.Pix.SplitTest do
              Split.unlink_charge(client, @txid)
 
     assert {:ok, %{"status" => "EM_PROCESSAMENTO"}} =
+             Split.refund(client, @e2e_id, "devolucao0001", %{"valor" => "20.00"})
+
+    assert {:error, %Efi.Error{kind: :conflict, name: "SplitDevolucaoOperacaoInvalida"}} =
              Split.refund(client, @e2e_id, "devolucao0001", %{"valor" => "20.00"})
   end
 
@@ -144,7 +169,10 @@ defmodule Efi.Pix.SplitTest do
     Efi.Test.expect(
       :put,
       "pix-h.api.efipay.com.br/v2/gn/split/cobv/#{@txid}/vinculo/#{@config_id}",
-      fn conn, _body -> Plug.Conn.send_resp(conn, 204, "") end
+      fn conn, body ->
+        assert body == nil
+        Plug.Conn.send_resp(conn, 204, "")
+      end
     )
 
     Efi.Test.expect(:get, "pix-h.api.efipay.com.br/v2/gn/split/cobv/#{@txid}", fn conn, _body ->

@@ -43,8 +43,8 @@ defmodule Efi.Pix.Webhook do
   configuração padrão, o app nunca vê o certificado da Efí, e sem mTLS o cadastro falha. Nesse
   caso, configure com `skip_mtls_checking: true`, que envia o header `x-skip-mtls-checking: true`
   e faz a Efí aceitar a URL sem testar o mTLS. A documentação da Efí não descreve esse header,
-  mas a Efí o aceita no cadastro e os SDKs oficiais o oferecem (no de Node, a opção
-  `skipMtlsChecking`):
+  mas a Efí o aceita no cadastro em produção e os SDKs oficiais o oferecem (no de Node, a opção
+  `validateMtls: false`):
 
       Efi.Pix.Webhook.configure(
         client,
@@ -68,9 +68,14 @@ defmodule Efi.Pix.Webhook do
 
   ## Entrega e reenvio
 
-  Cada notificação é um `POST` com JSON que espera resposta 2xx em até 60 segundos. Sem ela, a
-  Efí tenta de novo em intervalos crescentes, de 5 a 160 minutos, até a nona tentativa. Depois
-  disso, `resend/3` pede um novo envio, com estas regras da Efí:
+  Cada notificação é um `POST` com JSON. Os Pix recebidos, enviados e devolvidos chegam em
+  `"pix"`. Um recebimento que a Efí recusou por segurança chega em `"info"`, com `status`
+  `RECEBIMENTO_RECUSADO` e sem `endToEndId`: o valor não entrou na conta
+  ([documentação](https://dev.efipay.com.br/docs/api-pix/webhooks#requisição)).
+
+  A Efí espera resposta 2xx em até 60 segundos. Sem ela, tenta de novo em intervalos crescentes,
+  de 5 a 160 minutos, até a nona tentativa. Depois disso, `resend/3` pede um novo envio, com
+  estas regras da Efí:
 
     * só para transações dos últimos 30 dias, de 1 a 1000 `e2eids` por chamada;
     * uma tentativa por webhook, sem reagendamento: se o servidor estiver fora, peça de novo;
@@ -115,7 +120,7 @@ defmodule Efi.Pix.Webhook do
   """
   @spec list(Client.t(), map() | keyword(), keyword()) :: Efi.result()
   def list(%Client{} = client, params, opts \\ []) do
-    Client.request(client, :pix, :get, "/v2/webhook", Keyword.put(opts, :params, params))
+    Client.request(client, :pix, :get, "/v2/webhook", Client.put_params(opts, params))
   end
 
   @doc """

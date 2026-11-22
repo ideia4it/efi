@@ -53,7 +53,9 @@ defmodule Efi.Pix.ImmediateCharge do
 
   @doc """
   Revisa uma cobrança: muda os campos enviados e incrementa a `revisao`. Com
-  `%{"status" => "REMOVIDA_PELO_USUARIO_RECEBEDOR"}`, cancela a cobrança.
+  `%{"status" => "REMOVIDA_PELO_USUARIO_RECEBEDOR"}`, cancela a cobrança. Só cobranças `ATIVA`
+  aceitam revisão: as outras voltam como
+  `%Efi.Error{kind: :validation, name: "status_cobranca_invalido"}`.
 
   `PATCH /v2/cob/:txid` · escopo `cob.write`
 
@@ -88,6 +90,6 @@ defmodule Efi.Pix.ImmediateCharge do
   """
   @spec list(Client.t(), map() | keyword(), keyword()) :: Efi.result()
   def list(%Client{} = client, params, opts \\ []) do
-    Client.request(client, :pix, :get, "/v2/cob", Keyword.put(opts, :params, params))
+    Client.request(client, :pix, :get, "/v2/cob", Client.put_params(opts, params))
   end
 end

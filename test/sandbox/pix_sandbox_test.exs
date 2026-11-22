@@ -12,10 +12,12 @@ defmodule Efi.Sandbox.PixTest do
     client = Sandbox.client()
     txid = Sandbox.txid()
 
+    # Na homologação, a Efí paga sozinha as cobranças de até R$ 10,00; acima disso a cobrança
+    # fica ATIVA e o cancelamento no fim da jornada é aceito.
     assert {:ok, %{"txid" => ^txid, "status" => "ATIVA", "loc" => %{"id" => location_id}}} =
              ImmediateCharge.create_with_txid(client, txid, %{
                "calendario" => %{"expiracao" => 3600},
-               "valor" => %{"original" => "1.00"},
+               "valor" => %{"original" => "15.00"},
                "chave" => Sandbox.pix_key(),
                "solicitacaoPagador" => "Teste da biblioteca efi"
              })
@@ -23,7 +25,7 @@ defmodule Efi.Sandbox.PixTest do
     assert {:error, %Efi.Error{kind: :conflict}} =
              ImmediateCharge.create_with_txid(client, txid, %{
                "calendario" => %{"expiracao" => 3600},
-               "valor" => %{"original" => "1.00"},
+               "valor" => %{"original" => "15.00"},
                "chave" => Sandbox.pix_key()
              })
 
@@ -32,7 +34,7 @@ defmodule Efi.Sandbox.PixTest do
 
     assert is_binary(copy_paste)
 
-    assert {:ok, %{"imagemQrcode" => "data:image/png;base64," <> _png}} =
+    assert {:ok, %{"imagemQrcode" => "data:image/" <> _image}} =
              Location.get_qr_code(client, location_id)
 
     now = DateTime.utc_now()

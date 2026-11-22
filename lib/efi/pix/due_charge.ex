@@ -10,7 +10,9 @@ defmodule Efi.Pix.DueCharge do
   `devedor` é obrigatório, com `nome` e `cpf` ou `cnpj` (nunca os dois). A cobrança pode ser paga
   até `calendario.dataDeVencimento`, prorrogada para o primeiro dia útil se cair em fim de semana
   ou feriado, e depois disso por mais `calendario.validadeAposVencimento` dias corridos, já com
-  multa e juros.
+  multa e juros. Se o último desses dias não for útil, o prazo também passa para o próximo dia
+  útil
+  ([exemplos da Efí](https://dev.efipay.com.br/docs/api-pix/glossario#ilustração-do-funcionamento-das-cobranças-cobv-após-a-data-de-vencimento)).
 
       {:ok, charge} =
         Efi.Pix.DueCharge.create(client, "studioana0000000000000000001", %{
@@ -93,6 +95,6 @@ defmodule Efi.Pix.DueCharge do
   """
   @spec list(Client.t(), map() | keyword(), keyword()) :: Efi.result()
   def list(%Client{} = client, params, opts \\ []) do
-    Client.request(client, :pix, :get, "/v2/cobv", Keyword.put(opts, :params, params))
+    Client.request(client, :pix, :get, "/v2/cobv", Client.put_params(opts, params))
   end
 end

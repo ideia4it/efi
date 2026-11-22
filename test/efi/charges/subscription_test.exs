@@ -15,9 +15,27 @@ defmodule Efi.Charges.SubscriptionTest do
   test "subscribes a customer by card in one step, swaps the card, notes the history and cancels it" do
     client = Efi.Test.client(certificate: nil)
 
+    subscription = %{
+      "items" => [%{"name" => "Clube de escova", "value" => 9_900, "amount" => 1}],
+      "payment" => %{
+        "credit_card" => %{
+          "customer" => Map.put(@customer, "birth", "1990-08-29"),
+          "billing_address" => %{
+            "street" => "Rua das Flores",
+            "number" => "100",
+            "neighborhood" => "Centro",
+            "zipcode" => "35400000",
+            "city" => "Ouro Preto",
+            "state" => "MG"
+          },
+          "payment_token" => "token-do-cartao",
+          "trial_days" => 7
+        }
+      }
+    }
+
     Efi.Test.expect(:post, "#{@host}/v1/plan/7007/subscription/one-step", fn conn, body ->
-      assert body["payment"]["credit_card"]["payment_token"] == "token-do-cartao"
-      assert body["payment"]["credit_card"]["trial_days"] == 7
+      assert body == subscription
 
       Req.Test.json(conn, %{
         "code" => 200,
@@ -39,7 +57,8 @@ defmodule Efi.Charges.SubscriptionTest do
       Req.Test.json(conn, %{"code" => 200})
     end)
 
-    Efi.Test.expect(:put, "#{@host}/v1/subscription/8008/cancel", fn conn, _body ->
+    Efi.Test.expect(:put, "#{@host}/v1/subscription/8008/cancel", fn conn, body ->
+      assert body == nil
       Req.Test.json(conn, %{"code" => 200})
     end)
 
@@ -51,16 +70,7 @@ defmodule Efi.Charges.SubscriptionTest do
     end)
 
     assert {:ok, %{"data" => %{"subscription_id" => 8008, "status" => "active"}}} =
-             Subscription.create_one_step(client, 7007, %{
-               "items" => [%{"name" => "Clube de escova", "value" => 9_900, "amount" => 1}],
-               "payment" => %{
-                 "credit_card" => %{
-                   "customer" => @customer,
-                   "payment_token" => "token-do-cartao",
-                   "trial_days" => 7
-                 }
-               }
-             })
+             Subscription.create_one_step(client, 7007, subscription)
 
     assert {:ok, %{"data" => %{"subscription_id" => 8008}}} =
              Subscription.update(client, 8008, %{"payment_token" => "token-do-cartao-novo"})
@@ -78,6 +88,12 @@ defmodule Efi.Charges.SubscriptionTest do
   test "subscribes a customer by boleto in two steps and points its notifications to the app" do
     client = Efi.Test.client(certificate: nil)
 
+    payment = %{
+      "payment" => %{
+        "banking_billet" => %{"customer" => @customer, "expire_at" => "2026-12-10"}
+      }
+    }
+
     Efi.Test.expect(:post, "#{@host}/v1/plan/7007/subscription", fn conn, body ->
       assert body == %{
                "items" => [%{"name" => "Clube de escova", "value" => 9_900, "amount" => 1}]
@@ -90,7 +106,7 @@ defmodule Efi.Charges.SubscriptionTest do
     end)
 
     Efi.Test.expect(:post, "#{@host}/v1/subscription/8009/pay", fn conn, body ->
-      assert body["payment"]["banking_billet"]["expire_at"] == "2026-12-10"
+      assert body == payment
 
       Req.Test.json(conn, %{
         "code" => 200,
@@ -113,11 +129,7 @@ defmodule Efi.Charges.SubscriptionTest do
              })
 
     assert {:ok, %{"data" => %{"status" => "active"}}} =
-             Subscription.set_payment_method(client, 8009, %{
-               "payment" => %{
-                 "banking_billet" => %{"customer" => @customer, "expire_at" => "2026-12-10"}
-               }
-             })
+             Subscription.set_payment_method(client, 8009, payment)
 
     assert {:ok, %{"code" => 200}} =
              Subscription.update_metadata(client, 8009, %{
@@ -129,8 +141,13 @@ defmodule Efi.Charges.SubscriptionTest do
   test "subscribes a customer through a payment link and resends the link by e-mail" do
     client = Efi.Test.client(certificate: nil)
 
+    subscription = %{
+      "items" => [%{"name" => "Clube de escova", "value" => 9_900, "amount" => 1}],
+      "settings" => %{"payment_method" => "all", "expire_at" => "2026-12-20"}
+    }
+
     Efi.Test.expect(:post, "#{@host}/v1/plan/7007/subscription/one-step/link", fn conn, body ->
-      assert body["settings"] == %{"payment_method" => "all", "expire_at" => "2026-12-20"}
+      assert body == subscription
 
       Req.Test.json(conn, %{
         "code" => 200,
@@ -149,10 +166,7 @@ defmodule Efi.Charges.SubscriptionTest do
     end)
 
     assert {:ok, %{"data" => %{"charge" => %{"id" => charge_id}, "payment_url" => _url}}} =
-             Subscription.create_one_step_link(client, 7007, %{
-               "items" => [%{"name" => "Clube de escova", "value" => 9_900, "amount" => 1}],
-               "settings" => %{"payment_method" => "all", "expire_at" => "2026-12-20"}
-             })
+             Subscription.create_one_step_link(client, 7007, subscription)
 
     assert {:ok, %{"code" => 200}} =
              Subscription.resend_link(client, charge_id, %{"email" => "cliente@app.example.com"})

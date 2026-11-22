@@ -3,6 +3,8 @@ defmodule Efi.BillPayments.Payment do
   Pagamento de contas pelo código de barras: boletos e tributos (água, luz, telefone, gás,
   impostos) pagos com o saldo da conta Efí.
 
+  Exige Conta Digital Efí Empresas.
+
   O fluxo tem três passos:
 
     1. `get_barcode/3` detalha o código de barras. A Efí exige essa consulta antes de cada
@@ -101,7 +103,7 @@ defmodule Efi.BillPayments.Payment do
   """
   @spec get_summary(Client.t(), map() | keyword(), keyword()) :: Efi.result()
   def get_summary(%Client{} = client, params, opts \\ []) do
-    Client.request(client, :bill_payments, :get, "/v1/resumo", Keyword.put(opts, :params, params))
+    Client.request(client, :bill_payments, :get, "/v1/resumo", Client.put_params(opts, params))
   end
 
   defp barcode_path(barcode), do: Client.path("/v1/codBarras/:codBarras", codBarras: barcode)

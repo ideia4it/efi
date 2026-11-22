@@ -25,7 +25,7 @@ defmodule Efi.Pix.Receipt do
       :pix,
       :get,
       "/v2/gn/pix/comprovantes",
-      Keyword.put(opts, :params, params)
+      Client.put_params(opts, params)
     )
   end
 end

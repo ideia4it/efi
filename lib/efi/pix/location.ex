@@ -48,7 +48,7 @@ defmodule Efi.Pix.Location do
 
   @doc """
   Lista os locations criados entre `inicio` e `fim` (RFC 3339, obrigatórios). Filtros
-  opcionais: `txIdPresente`, `tipoCob` (`COB` ou `COBV`), `paginacao.paginaAtual` e
+  opcionais: `txIdPresente`, `tipoCob` (`cob` ou `cobv`), `paginacao.paginaAtual` e
   `paginacao.itensPorPagina`.
 
   `GET /v2/loc` · escopo `payloadlocation.read`
@@ -57,7 +57,7 @@ defmodule Efi.Pix.Location do
   """
   @spec list(Client.t(), map() | keyword(), keyword()) :: Efi.result()
   def list(%Client{} = client, params, opts \\ []) do
-    Client.request(client, :pix, :get, "/v2/loc", Keyword.put(opts, :params, params))
+    Client.request(client, :pix, :get, "/v2/loc", Client.put_params(opts, params))
   end
 
   @doc """

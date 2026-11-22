@@ -2,6 +2,8 @@ defmodule Efi.Charges.CardTest do
   use ExUnit.Case, async: true
 
   alias Efi.Charges.Card
+  alias Efi.Charges.Charge
+  alias Efi.Charges.Notification
 
   setup {Req.Test, :verify_on_exit!}
 
@@ -11,9 +13,28 @@ defmodule Efi.Charges.CardTest do
     "cpf" => "12345678909",
     "email" => "cliente@app.example.com"
   }
+  @billing_address %{
+    "street" => "Rua das Flores",
+    "number" => "100",
+    "neighborhood" => "Centro",
+    "zipcode" => "35400000",
+    "city" => "Ouro Preto",
+    "state" => "MG"
+  }
 
-  test "shows the installments, charges the card with 3DS and gets a challenge back" do
+  test "shows the installments, charges the card with 3DS and learns from the notification that the challenge passed" do
     client = Efi.Test.client(certificate: nil)
+
+    charge = %{
+      "items" => [%{"name" => "Pacote de 4 escovas", "value" => 20_000, "amount" => 1}],
+      "customer" => @customer,
+      "installments" => 2,
+      "payment_token" => "token-do-cartao-gerado-no-navegador",
+      "tds_info" => %{
+        "tds_identifier" => "f81d4fae-7dec-11d0-a765-00a0c91e6bf6",
+        "challenge_callback_url" => "https://app.example.com/pagamento/3ds"
+      }
+    }
 
     Efi.Test.expect(:get, "#{@host}/v1/installments", fn conn, _body ->
       assert conn.query_params == %{"brand" => "visa", "total" => "20000"}
@@ -31,14 +52,7 @@ defmodule Efi.Charges.CardTest do
     end)
 
     Efi.Test.expect(:post, "#{@host}/v1/charge/card", fn conn, body ->
-      assert body["customer"] == @customer
-      assert body["installments"] == 2
-      assert body["payment_token"] == "token-do-cartao-gerado-no-navegador"
-
-      assert body["tds_info"] == %{
-               "tds_identifier" => "f81d4fae-7dec-11d0-a765-00a0c91e6bf6",
-               "challenge_callback_url" => "https://app.example.com/pagamento/3ds"
-             }
+      assert body == charge
 
       Req.Test.json(conn, %{
         "charge_id" => 3003,
@@ -54,25 +68,82 @@ defmodule Efi.Charges.CardTest do
     assert {:ok, %{"data" => %{"installments" => [_one, %{"installment" => 2}]}}} =
              Card.list_installments(client, %{"brand" => "visa", "total" => 20_000})
 
+    Efi.Test.expect(:get, "#{@host}/v1/notification/token-da-notificacao", fn conn, _body ->
+      Req.Test.json(conn, %{
+        "code" => 200,
+        "data" => [
+          %{
+            "id" => 1,
+            "type" => "charge",
+            "identifiers" => %{"charge_id" => 3003},
+            "status" => %{"current" => "waiting", "previous" => nil}
+          },
+          %{
+            "id" => 2,
+            "type" => "charge",
+            "identifiers" => %{"charge_id" => 3003},
+            "status" => %{"current" => "approved", "previous" => "waiting"}
+          }
+        ]
+      })
+    end)
+
     assert {:ok, %{"status" => "waiting", "tds_challenge" => %{"html_template" => _html}}} =
-             Card.create(client, %{
-               "items" => [%{"name" => "Pacote de 4 escovas", "value" => 20_000, "amount" => 1}],
-               "customer" => @customer,
-               "installments" => 2,
-               "payment_token" => "token-do-cartao-gerado-no-navegador",
-               "tds_info" => %{
-                 "tds_identifier" => "f81d4fae-7dec-11d0-a765-00a0c91e6bf6",
-                 "challenge_callback_url" => "https://app.example.com/pagamento/3ds"
-               }
-             })
+             Card.create(client, charge)
+
+    assert {:ok, %{"data" => [_waiting, approval]}} =
+             Notification.get(client, "token-da-notificacao")
+
+    assert %{"identifiers" => %{"charge_id" => 3003}, "status" => %{"current" => "approved"}} =
+             approval
   end
 
-  test "retries a refused card payment with a new card, then refunds part of it and the rest" do
+  test "is refused by the issuer, pays on the retry with another card and refunds part of it" do
     client = Efi.Test.client(certificate: nil)
 
+    first_attempt = %{
+      "items" => [%{"name" => "Coloração", "value" => 18_000, "amount" => 1}],
+      "payment" => %{
+        "credit_card" => %{
+          "customer" => @customer,
+          "installments" => 1,
+          "billing_address" => @billing_address,
+          "payment_token" => "token-do-cartao-recusado"
+        }
+      }
+    }
+
+    retry = %{
+      "payment" => %{
+        "credit_card" => %{
+          "customer" => @customer,
+          "billing_address" => @billing_address,
+          "payment_token" => "token-do-cartao-novo",
+          "update_card" => true
+        }
+      }
+    }
+
+    Efi.Test.expect(:post, "#{@host}/v1/charge/one-step", fn conn, body ->
+      assert body == first_attempt
+
+      Req.Test.json(conn, %{
+        "code" => 200,
+        "data" => %{
+          "charge_id" => 3003,
+          "status" => "unpaid",
+          "refusal" => %{
+            "reason" => "Transação não autorizada, tente novamente mais tarde.",
+            "retry" => true
+          },
+          "total" => 18_000,
+          "payment" => "credit_card"
+        }
+      })
+    end)
+
     Efi.Test.expect(:post, "#{@host}/v1/charge/3003/retry", fn conn, body ->
-      assert body["payment"]["credit_card"]["payment_token"] == "token-do-cartao-novo"
-      assert body["payment"]["credit_card"]["update_card"] == true
+      assert body == retry
 
       Req.Test.json(conn, %{
         "code" => 200,
@@ -80,31 +151,34 @@ defmodule Efi.Charges.CardTest do
       })
     end)
 
+    Efi.Test.expect(:get, "#{@host}/v1/charge/3003", fn conn, _body ->
+      Req.Test.json(conn, %{"code" => 200, "data" => %{"charge_id" => 3003, "status" => "paid"}})
+    end)
+
     Efi.Test.expect(:post, "#{@host}/v1/charge/card/3003/refund", fn conn, body ->
       assert body == %{"amount" => 5000}
       Req.Test.json(conn, %{"code" => 200, "data" => "Reembolso em processamento"})
     end)
 
-    Efi.Test.expect(:post, "#{@host}/v1/charge/card/3003/refund", fn conn, body ->
+    assert {:ok, %{"data" => %{"status" => "unpaid", "refusal" => %{"retry" => true}}}} =
+             Charge.create_one_step(client, first_attempt)
+
+    assert {:ok, %{"data" => %{"status" => "waiting"}}} = Card.retry(client, 3003, retry)
+    assert {:ok, %{"data" => %{"status" => "paid"}}} = Charge.get(client, 3003)
+
+    assert {:ok, %{"data" => "Reembolso em processamento"}} =
+             Card.refund(client, 3003, json: %{"amount" => 5000})
+  end
+
+  test "refunds the whole card payment when no amount is given" do
+    client = Efi.Test.client(certificate: nil)
+
+    Efi.Test.expect(:post, "#{@host}/v1/charge/card/3004/refund", fn conn, body ->
       assert body == %{}
       Req.Test.json(conn, %{"code" => 200, "data" => "Reembolso em processamento"})
     end)
 
-    assert {:ok, %{"data" => %{"status" => "waiting"}}} =
-             Card.retry(client, 3003, %{
-               "payment" => %{
-                 "credit_card" => %{
-                   "customer" => @customer,
-                   "payment_token" => "token-do-cartao-novo",
-                   "update_card" => true
-                 }
-               }
-             })
-
-    assert {:ok, %{"data" => "Reembolso em processamento"}} =
-             Card.refund(client, 3003, json: %{"amount" => 5000})
-
-    assert {:ok, %{"data" => "Reembolso em processamento"}} = Card.refund(client, 3003)
+    assert {:ok, %{"data" => "Reembolso em processamento"}} = Card.refund(client, 3004)
   end
 
   test "reports a refused 3DS charge in the problem format of that route" do

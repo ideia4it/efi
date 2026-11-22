@@ -87,7 +87,7 @@ defmodule Efi.OpenFinance.AutomaticPayment do
   """
   @spec list_enrollments(Client.t(), map() | keyword(), keyword()) :: Efi.result()
   def list_enrollments(%Client{} = client, params, opts \\ []) do
-    opts = Keyword.put(opts, :params, params)
+    opts = Client.put_params(opts, params)
     Client.request(client, :open_finance, :get, "/v1/pagamentos-automaticos/adesao", opts)
   end
 
@@ -133,7 +133,7 @@ defmodule Efi.OpenFinance.AutomaticPayment do
   """
   @spec list(Client.t(), map() | keyword(), keyword()) :: Efi.result()
   def list(%Client{} = client, params, opts \\ []) do
-    opts = Keyword.put(opts, :params, params)
+    opts = Client.put_params(opts, params)
     Client.request(client, :open_finance, :get, "/v1/pagamentos-automaticos/pix", opts)
   end
 

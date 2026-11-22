@@ -1335,8 +1335,8 @@
   "family": "pix",
   "method": "GET",
   "path": "/v2/gn/chaves/balde",
-  "scope": null,
-  "doc": null
+  "scope": "gn.keys.bucket.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/endpoints-exclusivos-efi#consultar-baldes-de-fichas"
  },
  {
   "family": "cobrancas",
@@ -1345,27 +1345,43 @@
   "scope": null,
   "doc": null,
   "note": "fora da extração automática da doc; conferir na página",
-  "skip": "só no SDK de Node; a doc (conferida em 19/11/2026) documenta POST /v1/charge/card, em Efi.Charges.Card.create/3"
+  "skip": "só no SDK de Node; a doc (conferida em 22/11/2026) documenta POST /v1/charge/card, em Efi.Charges.Card.create/3. O SDK de PHP trocou /v2 por /v1 em 09/11/2026, e /v2/charge/card responde 404 nos dois hosts"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/partner/charge/one-step",
+  "scope": null,
+  "doc": null,
+  "skip": "só nos SDKs de PHP, Ruby e Java, sem exemplo; nenhuma página do sitemap da doc (conferido em 22/11/2026) cita a rota nem o header partner-token"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/partner/charge/:id/pay",
+  "scope": null,
+  "doc": null,
+  "skip": "só nos SDKs de PHP, Ruby e Java, sem exemplo; nenhuma página do sitemap da doc (conferido em 22/11/2026) cita a rota nem o header partner-token"
  },
  {
   "family": "pix",
   "method": "PUT",
   "path": "/v2/gn/split/cob/:txid/vinculo/:splitConfigId",
-  "scope": null,
-  "doc": null
+  "scope": "gn.split.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/split-de-pagamento-pix#vincular-uma-cobrança-a-um-split-de-pagamento"
  },
  {
   "family": "pix",
   "method": "PUT",
   "path": "/v2/gn/split/cobv/:txid/vinculo/:splitConfigId",
-  "scope": null,
-  "doc": null
+  "scope": "gn.split.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/split-de-pagamento-pix#vincular-uma-cobrança-com-vencimento-a-um-split-de-pagamento-por-txid"
  },
  {
   "family": "pix",
   "method": "POST",
   "path": "/v2/gn/qrcodes/detalhar",
-  "scope": null,
-  "doc": null
+  "scope": "gn.qrcodes.read",
+  "doc": "https://dev.efipay.com.br/en/docs/api-pix/envio-pagamento-pix#detail-qr-code-pix"
  }
 ]

@@ -228,6 +228,18 @@ defmodule Efi.Client do
   end
 
   @doc """
+  Junta os parâmetros de query que uma função recebe como argumento aos opcionais de
+  `opts[:params]`. Num nome repetido, vale o argumento.
+
+      iex> Efi.Client.put_params([params: %{"status" => "ATIVA"}], %{"inicio" => "2026-11-01"})
+      [params: %{"inicio" => "2026-11-01", "status" => "ATIVA"}]
+  """
+  @spec put_params(keyword(), map() | keyword()) :: keyword()
+  def put_params(opts, params) do
+    Keyword.update(opts, :params, params, &Map.merge(Map.new(&1), Map.new(params)))
+  end
+
+  @doc """
   Monta o caminho de uma rota a partir do modelo da documentação, codificando cada valor.
 
   Um valor ausente, `nil`, vazio, `"."` ou `".."` levanta `ArgumentError`: com ele, o caminho

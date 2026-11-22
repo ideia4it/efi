@@ -37,6 +37,20 @@ defmodule Efi.Statements.CnabFileTest do
     assert {:ok, ^cnab} = CnabFile.download(client, file_name)
   end
 
+  test "downloads a compressed statement byte for byte" do
+    client = Efi.Test.client(environment: :production)
+    zip_name = "EFI_00000000_20261118_000000_CNAB_240.zip"
+    zip = <<"PK", 3, 4, 20, 0, 0xFF, 0xFE, 0x00, 0x8B>> <> "extrato do Studio Ana"
+
+    Efi.Test.expect(:get, "#{@host}/v1/extrato-cnab/download/#{zip_name}", fn conn, _body ->
+      conn
+      |> Plug.Conn.put_resp_content_type("application/zip", nil)
+      |> Plug.Conn.send_resp(200, zip)
+    end)
+
+    assert {:ok, ^zip} = CnabFile.download(client, zip_name)
+  end
+
   test "reports a file the Efí cannot find with its message" do
     client = Efi.Test.client(environment: :production)
 

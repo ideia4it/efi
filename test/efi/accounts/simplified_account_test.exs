@@ -2,6 +2,7 @@ defmodule Efi.Accounts.SimplifiedAccountTest do
   use ExUnit.Case, async: true
 
   alias Efi.Accounts.SimplifiedAccount
+  alias Efi.Accounts.Webhook
 
   setup {Req.Test, :verify_on_exit!}
 
@@ -92,6 +93,66 @@ defmodule Efi.Accounts.SimplifiedAccountTest do
     )
 
     assert {:ok, ^certificate_base64} = SimplifiedAccount.create_certificate(client, @account_id)
+  end
+
+  test "asks the partner to register the account webhook before opening the first account" do
+    client = Efi.Test.client()
+
+    Efi.Test.expect(:post, "#{@host}/v1/conta-simplificada", fn conn, _body ->
+      conn
+      |> Plug.Conn.put_status(412)
+      |> Req.Test.json(%{
+        "nome" => "webhook_nao_cadastrado",
+        "mensagem" => "Sua conta não possui webhook cadastrado na API de Cadastro."
+      })
+    end)
+
+    Efi.Test.expect(:post, "#{@host}/v1/webhook", fn conn, body ->
+      assert body == %{"webhookUrl" => "https://app.example.com/efi/contas"}
+      Req.Test.json(conn, %{"identificadorWebhook" => "92ecc0a8-9631-4601-a188-feacf8288c13"})
+    end)
+
+    Efi.Test.expect(:post, "#{@host}/v1/conta-simplificada", fn conn, body ->
+      assert body == @customer
+      Req.Test.json(conn, %{"contaSimplificada" => %{"identificador" => @account_id}})
+    end)
+
+    assert {:error,
+            %Efi.Error{
+              kind: :precondition_failed,
+              status: 412,
+              name: "webhook_nao_cadastrado"
+            }} = SimplifiedAccount.create(client, @customer)
+
+    assert {:ok, _webhook} =
+             Webhook.configure(client, %{"webhookUrl" => "https://app.example.com/efi/contas"})
+
+    assert {:ok, %{"contaSimplificada" => %{"identificador" => @account_id}}} =
+             SimplifiedAccount.create(client, @customer)
+  end
+
+  test "refuses another certificate once the account reached its limit" do
+    client = Efi.Test.client()
+
+    Efi.Test.expect(
+      :post,
+      "#{@host}/v1/conta-simplificada/#{@account_id}/certificado",
+      fn conn, _body ->
+        conn
+        |> Plug.Conn.put_status(403)
+        |> Req.Test.json(%{
+          "nome" => "quantidade_limite_de_certificados",
+          "mensagem" => "A conta atingiu a quantidade máxima de certificados."
+        })
+      end
+    )
+
+    assert {:error,
+            %Efi.Error{
+              kind: :forbidden,
+              status: 403,
+              name: "quantidade_limite_de_certificados"
+            }} = SimplifiedAccount.create_certificate(client, @account_id)
   end
 
   test "refuses a duplicated opening request and asks to wait while the account is processed" do

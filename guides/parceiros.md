@@ -57,10 +57,11 @@ O webhook não é opcional: sem ele, o pedido de abertura volta com 412 `webhook
 E nenhuma página da documentação da Efí cita o header de pular o mTLS. Ele vem dos SDKs
 oficiais: o de Node, com `validateMtls: false`, o manda no cadastro dos webhooks do Pix, da
 Abertura de Contas e do Pagamento de Contas. No webhook Pix ele funciona em produção; na
-Abertura de Contas, ainda não há confirmação. **Confirme na homologação antes de planejar o
-resto.** Se a Efí recusar o header aqui, o servidor do webhook precisa fazer o mTLS de verdade:
-encerrar o TLS no próprio app (no Fly.io, um serviço TCP sem o handler de TLS) ou pôr na frente
-um proxy que exija o certificado da Efí, como o Nginx do repositório `efipay/mtls-webhook`.
+Abertura de Contas e no Pagamento de Contas, ainda não há confirmação. **Confirme na homologação
+antes de planejar o resto.** Se a Efí recusar o header aqui, o servidor do webhook precisa fazer
+o mTLS de verdade: encerrar o TLS no próprio app (no Fly.io, um serviço TCP sem o handler de
+TLS) ou pôr na frente um proxy que exija o certificado da Efí, como o Nginx do repositório
+`efipay/mtls-webhook`.
 
 ## 3. Pedir a abertura da conta
 

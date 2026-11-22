@@ -5,7 +5,7 @@ defmodule Efi.Dev.Documentation do
   # rota da Efí tem uma função, com o link para a seção certa da doc oficial.
 
   @api_namespaces ~w(Pix Charges OpenFinance Accounts BillPayments Statements)
-  @docs_link ~r{https://dev\.efipay\.com\.br/docs/[^\s)\]>"']+}
+  @docs_link ~r{https://dev\.efipay\.com\.br/(?:en/)?docs/[^\s)\]>"']+}
   @route_line ~r{`(GET|POST|PUT|PATCH|DELETE) (/[^`\s]+)`}
 
   def api_modules do

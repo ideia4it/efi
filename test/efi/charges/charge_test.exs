@@ -11,6 +11,17 @@ defmodule Efi.Charges.ChargeTest do
   test "issues a balance sheet boleto in two steps, reschedules and resends it, then settles it by hand" do
     client = Efi.Test.client(certificate: nil)
 
+    balance_sheet = %{
+      "title" => "Demonstrativo de novembro",
+      "body" => [%{"header" => "Serviços", "tables" => []}]
+    }
+
+    payment = %{
+      "payment" => %{
+        "banking_billet" => %{"customer" => @customer, "expire_at" => "2026-12-15"}
+      }
+    }
+
     Efi.Test.expect(:post, "#{@host}/v1/charge", fn conn, body ->
       assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer token-de-teste"]
       assert body == %{"items" => [%{"name" => "Corte", "value" => 8900, "amount" => 1}]}
@@ -22,13 +33,12 @@ defmodule Efi.Charges.ChargeTest do
     end)
 
     Efi.Test.expect(:post, "#{@host}/v1/charge/1001/balance-sheet", fn conn, body ->
-      assert body["title"] == "Demonstrativo de novembro"
+      assert body == balance_sheet
       Req.Test.json(conn, %{"code" => 200})
     end)
 
     Efi.Test.expect(:post, "#{@host}/v1/charge/1001/pay", fn conn, body ->
-      assert body["payment"]["banking_billet"]["customer"] == @customer
-      assert body["payment"]["banking_billet"]["expire_at"] == "2026-12-15"
+      assert body == payment
 
       Req.Test.json(conn, %{
         "code" => 200,
@@ -77,18 +87,10 @@ defmodule Efi.Charges.ChargeTest do
                "items" => [%{"name" => "Corte", "value" => 8900, "amount" => 1}]
              })
 
-    assert {:ok, %{"code" => 200}} =
-             Charge.set_balance_sheet(client, 1001, %{
-               "title" => "Demonstrativo de novembro",
-               "body" => [%{"header" => "Serviços", "tables" => []}]
-             })
+    assert {:ok, %{"code" => 200}} = Charge.set_balance_sheet(client, 1001, balance_sheet)
 
     assert {:ok, %{"data" => %{"status" => "waiting"}}} =
-             Charge.set_payment_method(client, 1001, %{
-               "payment" => %{
-                 "banking_billet" => %{"customer" => @customer, "expire_at" => "2026-12-15"}
-               }
-             })
+             Charge.set_payment_method(client, 1001, payment)
 
     assert {:ok, %{"code" => 200}} =
              Charge.update_billet_due_date(client, 1001, %{"expire_at" => "2026-12-30"})
@@ -124,9 +126,15 @@ defmodule Efi.Charges.ChargeTest do
       }
     }
 
+    charge = %{
+      "items" => [item],
+      "payment" => %{
+        "banking_billet" => %{"customer" => @customer, "expire_at" => "2026-12-15"}
+      }
+    }
+
     Efi.Test.expect(:post, "#{@host}/v1/charge/one-step", fn conn, body ->
-      assert body["items"] == [item]
-      assert body["payment"]["banking_billet"]["customer"] == @customer
+      assert body == charge
 
       Req.Test.json(conn, %{
         "code" => 200,
@@ -150,17 +158,13 @@ defmodule Efi.Charges.ChargeTest do
       Req.Test.json(conn, %{"code" => 200, "data" => [%{"id" => 2002, "status" => "waiting"}]})
     end)
 
-    Efi.Test.expect(:put, "#{@host}/v1/charge/2002/cancel", fn conn, _body ->
+    Efi.Test.expect(:put, "#{@host}/v1/charge/2002/cancel", fn conn, body ->
+      assert body == nil
       Req.Test.json(conn, %{"code" => 200})
     end)
 
     assert {:ok, %{"data" => %{"charge_id" => 2002, "pix" => %{"qrcode" => _qrcode}}}} =
-             Charge.create_one_step(client, %{
-               "items" => [item],
-               "payment" => %{
-                 "banking_billet" => %{"customer" => @customer, "expire_at" => "2026-12-15"}
-               }
-             })
+             Charge.create_one_step(client, charge)
 
     assert {:ok, %{"data" => [%{"id" => 2002}]}} =
              Charge.list(client, %{

@@ -74,6 +74,27 @@ defmodule Efi.Pix.Automatic.ChargeTest do
              Charge.update(client, @txid, %{"status" => "CANCELADA"})
   end
 
+  test "is refused when cancelling a charge on or after the date of its first debit" do
+    client = Efi.Test.client()
+
+    Efi.Test.expect(:patch, "pix-h.api.efipay.com.br/v2/cobr/#{@txid}", fn conn, body ->
+      assert body == %{"status" => "CANCELADA"}
+
+      conn
+      |> Plug.Conn.put_status(400)
+      |> Req.Test.json(%{
+        "type" => "https://pix.bcb.gov.br/api/v2/error/CobROperacaoInvalida",
+        "title" => "Operação inválida.",
+        "status" => 400,
+        "detail" =>
+          "Não é possível cancelar uma cobrança em uma data igual ou maior que a data prevista da primeira tentativa de liquidação."
+      })
+    end)
+
+    assert {:error, %Efi.Error{kind: :validation, name: "CobROperacaoInvalida"}} =
+             Charge.update(client, @txid, %{"status" => "CANCELADA"})
+  end
+
   test "lets Efí pick the txid and schedules a new debit after the first one fails" do
     client = Efi.Test.client()
 

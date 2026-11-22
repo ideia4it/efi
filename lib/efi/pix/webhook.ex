@@ -68,9 +68,14 @@ defmodule Efi.Pix.Webhook do
 
   ## Entrega e reenvio
 
-  Cada notificação é um `POST` com JSON que espera resposta 2xx em até 60 segundos. Sem ela, a
-  Efí tenta de novo em intervalos crescentes, de 5 a 160 minutos, até a nona tentativa. Depois
-  disso, `resend/3` pede um novo envio, com estas regras da Efí:
+  Cada notificação é um `POST` com JSON. Os Pix recebidos, enviados e devolvidos chegam em
+  `"pix"`. Um recebimento que a Efí recusou por segurança chega em `"info"`, com `status`
+  `RECEBIMENTO_RECUSADO` e sem `endToEndId`: o valor não entrou na conta
+  ([documentação](https://dev.efipay.com.br/docs/api-pix/webhooks#requisição)).
+
+  A Efí espera resposta 2xx em até 60 segundos. Sem ela, tenta de novo em intervalos crescentes,
+  de 5 a 160 minutos, até a nona tentativa. Depois disso, `resend/3` pede um novo envio, com
+  estas regras da Efí:
 
     * só para transações dos últimos 30 dias, de 1 a 1000 `e2eids` por chamada;
     * uma tentativa por webhook, sem reagendamento: se o servidor estiver fora, peça de novo;

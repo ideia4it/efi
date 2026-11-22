@@ -68,7 +68,9 @@ defmodule Efi.Pix.ImmediateChargeTest do
   test "lets Efí pick the txid and reports a duplicated txid as a conflict" do
     client = Efi.Test.client()
 
-    Efi.Test.expect(:post, "pix-h.api.efipay.com.br/v2/cob", fn conn, _body ->
+    Efi.Test.expect(:post, "pix-h.api.efipay.com.br/v2/cob", fn conn, body ->
+      assert body == %{"valor" => %{"original" => "50.00"}}
+
       conn
       |> Plug.Conn.put_status(201)
       |> Req.Test.json(%{"txid" => "gerado0000000000000000000001", "status" => "ATIVA"})
@@ -90,5 +92,38 @@ defmodule Efi.Pix.ImmediateChargeTest do
              ImmediateCharge.create_with_txid(client, @txid, %{
                "valor" => %{"original" => "50.00"}
              })
+  end
+
+  test "cancels a charge and is refused when revising it afterwards" do
+    client = Efi.Test.client()
+
+    Efi.Test.expect(:patch, "pix-h.api.efipay.com.br/v2/cob/#{@txid}", fn conn, body ->
+      assert body == %{"status" => "REMOVIDA_PELO_USUARIO_RECEBEDOR"}
+
+      Req.Test.json(conn, %{
+        "txid" => @txid,
+        "revisao" => 1,
+        "status" => "REMOVIDA_PELO_USUARIO_RECEBEDOR"
+      })
+    end)
+
+    Efi.Test.expect(:patch, "pix-h.api.efipay.com.br/v2/cob/#{@txid}", fn conn, body ->
+      assert body == %{"valor" => %{"original" => "60.00"}}
+
+      conn
+      |> Plug.Conn.put_status(400)
+      |> Req.Test.json(%{
+        "nome" => "status_cobranca_invalido",
+        "mensagem" => "A cobrança não está mais com o status ATIVA"
+      })
+    end)
+
+    assert {:ok, %{"status" => "REMOVIDA_PELO_USUARIO_RECEBEDOR"}} =
+             ImmediateCharge.update(client, @txid, %{
+               "status" => "REMOVIDA_PELO_USUARIO_RECEBEDOR"
+             })
+
+    assert {:error, %Efi.Error{kind: :validation, status: 400, name: "status_cobranca_invalido"}} =
+             ImmediateCharge.update(client, @txid, %{"valor" => %{"original" => "60.00"}})
   end
 end

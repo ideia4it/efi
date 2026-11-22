@@ -1351,15 +1351,15 @@
   "family": "pix",
   "method": "PUT",
   "path": "/v2/gn/split/cob/:txid/vinculo/:splitConfigId",
-  "scope": null,
-  "doc": null
+  "scope": "gn.split.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/split-de-pagamento-pix#vincular-uma-cobrança-a-um-split-de-pagamento"
  },
  {
   "family": "pix",
   "method": "PUT",
   "path": "/v2/gn/split/cobv/:txid/vinculo/:splitConfigId",
-  "scope": null,
-  "doc": null
+  "scope": "gn.split.write",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/split-de-pagamento-pix#vincular-uma-cobrança-com-vencimento-a-um-split-de-pagamento-por-txid"
  },
  {
   "family": "pix",

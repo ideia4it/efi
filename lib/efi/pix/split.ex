@@ -18,7 +18,9 @@ defmodule Efi.Pix.Split do
      (`cobv`), enquanto a cobrança está `ATIVA`.
 
   Quando a cobrança é paga, a Efí divide o valor e registra cada parte, com conta, valor,
-  tarifa e data, no campo `split` que `get_charge/3` e `get_due_charge/3` devolvem.
+  tarifa e data, no campo `split` que `get_charge/3` e `get_due_charge/3` devolvem. Ali, `valor`
+  e `valorTarifa` vêm em centavos, como inteiro (`263` é R$ 2,63), e não como o texto com duas
+  casas (`"3.50"`) do resto da API Pix.
 
       {:ok, config} =
         Efi.Pix.Split.create_config(client, %{

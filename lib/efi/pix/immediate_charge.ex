@@ -53,7 +53,9 @@ defmodule Efi.Pix.ImmediateCharge do
 
   @doc """
   Revisa uma cobrança: muda os campos enviados e incrementa a `revisao`. Com
-  `%{"status" => "REMOVIDA_PELO_USUARIO_RECEBEDOR"}`, cancela a cobrança.
+  `%{"status" => "REMOVIDA_PELO_USUARIO_RECEBEDOR"}`, cancela a cobrança. Só cobranças `ATIVA`
+  aceitam revisão: as outras voltam como
+  `%Efi.Error{kind: :validation, name: "status_cobranca_invalido"}`.
 
   `PATCH /v2/cob/:txid` · escopo `cob.write`
 

@@ -16,13 +16,18 @@ defmodule Efi.Pix.Automatic.Webhook do
     * a Efí envia uma notificação de teste ao cadastrar. Nas notificações de verdade, acrescenta
       `/rec` (recorrência) ou `/cobr` (cobrança) ao fim da URL. Termine a URL com `?ignorar=`
       para receber tudo na mesma rota;
-    * o servidor do webhook precisa exigir o certificado da Efí (mTLS, TLS 1.2 ou maior). Atrás
-      de um proxy que encerra o TLS, passe `skip_mtls_checking: true` e proteja a URL de outra
-      forma, como um HMAC na query (`?hmac=...&ignorar=`) e a conferência do IP de origem;
-    * as notificações chegam por `POST` com `{"recs": [...]}` ou `{"cobsr": [...]}`. Sem
-      resposta 2xx, a Efí tenta de novo em intervalos que crescem de 5 a 160 minutos, até a
-      nona tentativa;
+    * o servidor do webhook precisa exigir o certificado da Efí (mTLS, TLS 1.2 ou maior), e a
+      Efí recomenda somar um HMAC na query (`?hmac=...&ignorar=`) e a conferência do IP de
+      origem;
+    * as notificações chegam por `POST` com `{"recs": [...]}` ou `{"cobsr": [...]}` e esperam
+      resposta 2xx em até 60 segundos. Sem ela, a Efí tenta de novo em intervalos que crescem de
+      5 a 160 minutos, até a nona tentativa;
     * o reenvio manual de webhooks da API Pix não vale para o Pix Automático.
+
+  Atrás de um proxy que encerra o TLS, `skip_mtls_checking: true` envia o header
+  `x-skip-mtls-checking: true`, como no webhook Pix comum. A doc da Efí não descreve esse header
+  nem diz se ele vale para estes dois webhooks; sem mTLS, o HMAC e o IP passam a ser a única
+  proteção da URL.
   """
 
   alias Efi.Client

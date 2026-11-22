@@ -337,15 +337,21 @@ defmodule Efi.Client do
     |> build_request(client, api, client.receive_timeout)
     |> Req.request()
     |> case do
-      {:ok, %Req.Response{status: status} = response} when status in 200..299 ->
-        {:ok, Token.from_response(decode(response), DateTime.utc_now())}
+      {:ok, %Req.Response{} = response} -> token_from_response(response)
+      {:error, exception} -> {:error, %Error{kind: :transport, reason: exception}}
+    end
+  end
 
-      {:ok, %Req.Response{status: status} = response} ->
-        error = Error.from_response(status, decode(response), response.headers)
+  # Um 2xx sem `access_token`, como a página HTML de um proxy, também é falha do pedido do token.
+  defp token_from_response(%Req.Response{status: status} = response) do
+    case decode(response) do
+      %{"access_token" => access_token} = body
+      when status in 200..299 and is_binary(access_token) ->
+        {:ok, Token.from_response(body, DateTime.utc_now())}
+
+      body ->
+        error = Error.from_response(status, body, response.headers)
         {:error, %{error | kind: :authentication}}
-
-      {:error, exception} ->
-        {:error, %Error{kind: :transport, reason: exception}}
     end
   end
 

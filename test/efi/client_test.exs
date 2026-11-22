@@ -138,6 +138,20 @@ defmodule Efi.ClientTest do
               }} = ImmediateCharge.get(client, "abc")
     end
 
+    test "reports a token answer without an access token as an authentication error" do
+      client = Efi.Test.client(token_store: nil)
+
+      Efi.Test.expect(:post, "pix-h.api.efipay.com.br/oauth/token", fn conn, _body ->
+        conn
+        |> Plug.Conn.put_resp_content_type("text/html")
+        |> Plug.Conn.send_resp(200, "<html>Em manutenção</html>")
+      end)
+
+      assert {:error,
+              %Error{kind: :authentication, status: 200, body: "<html>Em manutenção</html>"}} =
+               ImmediateCharge.get(client, "abc")
+    end
+
     test "reports a token request that never got an answer as a transport error" do
       client = Efi.Test.client(token_store: nil)
 

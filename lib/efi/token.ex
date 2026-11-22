@@ -14,6 +14,7 @@ defmodule Efi.Token do
   @enforce_keys [:access_token, :token_type, :expires_at]
   defstruct [:access_token, :token_type, :expires_at, :scope]
 
+  @typedoc "Token de uma API, com o vencimento já calculado a partir do `expires_in`."
   @type t :: %__MODULE__{
           access_token: String.t(),
           token_type: String.t(),

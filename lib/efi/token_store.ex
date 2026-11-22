@@ -14,6 +14,7 @@ defmodule Efi.TokenStore do
   `:error`, e a chamada segue pedindo um token novo.
   """
 
+  @typedoc "Chave de um token: a API, o ambiente e o `client_id` da aplicação."
   @type key :: {Efi.Client.api(), Efi.Client.environment(), String.t()}
 
   @doc "Devolve o token guardado para `key`, vencido ou não, ou `:error` se não houver."

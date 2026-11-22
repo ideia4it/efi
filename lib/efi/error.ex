@@ -38,6 +38,7 @@ defmodule Efi.Error do
   novo, e `bucket-size`, com as fichas que sobraram.
   """
 
+  @typedoc "O que deu errado, igual em todas as APIs (veja a primeira tabela)."
   @type kind ::
           :validation
           | :unauthorized
@@ -53,6 +54,10 @@ defmodule Efi.Error do
           | :certificate
           | :configuration
 
+  @typedoc """
+  `status`, `name`, `message`, `body` e `headers` vêm da resposta da Efí. `reason` explica os
+  erros que não têm resposta: `:transport`, `:certificate` e `:configuration`.
+  """
   @type t :: %__MODULE__{
           kind: kind(),
           status: pos_integer() | nil,

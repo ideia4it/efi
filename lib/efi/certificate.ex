@@ -88,8 +88,13 @@ defmodule Efi.Certificate do
   @enforce_keys [:certificate, :key, :chain, :not_before, :not_after]
   defstruct [:certificate, :key, :chain, :not_before, :not_after]
 
+  @typedoc "Chave privada em DER, com o tipo que o `:ssl` espera."
   @type private_key :: {:PrivateKeyInfo | :RSAPrivateKey | :ECPrivateKey, binary()}
 
+  @typedoc """
+  Certificado aberto: o da aplicação e a chave, em DER; os outros certificados do arquivo em
+  `chain`; e a validade.
+  """
   @type t :: %__MODULE__{
           certificate: binary(),
           key: private_key(),

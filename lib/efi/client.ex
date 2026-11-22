@@ -96,8 +96,13 @@ defmodule Efi.Client do
     req_options: []
   ]
 
+  @typedoc "Uma API da Efí. Cada uma tem host, rota de token e escopos próprios (veja a tabela acima)."
   @type api :: :pix | :charges | :open_finance | :accounts | :bill_payments | :statements
+
+  @typedoc "`:production` ou `:sandbox` (homologação)."
   @type environment :: :production | :sandbox
+
+  @typedoc "Cliente montado por `new/1`, com as opções descritas lá."
 
   @type t :: %__MODULE__{
           client_id: String.t(),

@@ -25,7 +25,7 @@ defmodule Efi.Pix.WebhookTest do
     Efi.Test.expect(:put, "pix-h.api.efipay.com.br/v2/webhook/#{@key}", fn conn, body ->
       assert Plug.Conn.get_req_header(conn, "x-skip-mtls-checking") == ["true"]
       assert body == %{"webhookUrl" => @webhook_url}
-      Req.Test.json(conn, %{"webhookUrl" => @webhook_url})
+      Plug.Conn.send_resp(conn, 201, "")
     end)
 
     Efi.Test.expect(:get, "pix-h.api.efipay.com.br/v2/webhook/#{@key}", fn conn, _body ->
@@ -52,7 +52,7 @@ defmodule Efi.Pix.WebhookTest do
               message: "A autenticação de TLS mútuo não está configurada na URL informada"
             }} = Webhook.configure(client, @key, %{"webhookUrl" => @webhook_url})
 
-    assert {:ok, %{"webhookUrl" => @webhook_url}} =
+    assert {:ok, nil} =
              Webhook.configure(client, @key, %{"webhookUrl" => @webhook_url},
                skip_mtls_checking: true
              )
@@ -69,14 +69,40 @@ defmodule Efi.Pix.WebhookTest do
   end
 
   test "asks Efí to deliver again the notifications of payments the server missed" do
-    client = Efi.Test.client()
+    client = Efi.Test.client(environment: :production)
     e2e_ids = ["E12345678202611191200abcdef12345", "E12345678202611191201abcdef12346"]
 
-    Efi.Test.expect(:post, "pix-h.api.efipay.com.br/v2/gn/webhook/reenviar", fn conn, body ->
+    Efi.Test.expect(:post, "pix.api.efipay.com.br/v2/gn/webhook/reenviar", fn conn, body ->
       assert body == %{"tipo" => "PIX_RECEBIDO", "e2eids" => e2e_ids}
       Plug.Conn.send_resp(conn, 202, "")
     end)
 
     assert {:ok, nil} = Webhook.resend(client, %{"tipo" => "PIX_RECEBIDO", "e2eids" => e2e_ids})
+  end
+
+  test "is told by the sandbox that resending notifications only works in production" do
+    client = Efi.Test.client()
+
+    Efi.Test.expect(:post, "pix-h.api.efipay.com.br/v2/gn/webhook/reenviar", fn conn, _body ->
+      conn
+      |> Plug.Conn.put_status(500)
+      |> Req.Test.json(%{
+        "type" => "https://pix.bcb.gov.br/api/v2/error/WebhooksErroInterno",
+        "title" => "Erro Interno",
+        "status" => 500,
+        "detail" => "Funcionalidade desabilitada em ambiente de homologação."
+      })
+    end)
+
+    assert {:error,
+            %Efi.Error{
+              kind: :server,
+              name: "WebhooksErroInterno",
+              message: "Funcionalidade desabilitada em ambiente de homologação."
+            }} =
+             Webhook.resend(client, %{
+               "tipo" => "PIX_RECEBIDO",
+               "e2eids" => ["E12345678202611191200abcdef12345"]
+             })
   end
 end

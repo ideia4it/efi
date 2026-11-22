@@ -71,7 +71,10 @@ defmodule Efi.Client do
       exigem a chave a recebem como argumento, então esta opção só serve para outra rota;
     * `:skip_mtls_checking` - com `true`, envia `x-skip-mtls-checking: true` ao cadastrar um
       webhook. Use quando o servidor do webhook não valida o certificado da Efí, como atrás de
-      um proxy que encerra o TLS (Fly.io, Heroku, Render), e proteja a URL de outra forma;
+      um proxy que encerra o TLS (Fly.io, Heroku, Render), e proteja a URL de outra forma. A
+      documentação da Efí não descreve esse header: ele vem dos SDKs oficiais, que o mandam no
+      cadastro do webhook do Pix, do Pix Automático, do Pagamento de Contas e da Abertura de
+      Contas;
     * `:headers` - headers extras;
     * `:receive_timeout` - sobrescreve o do cliente só nesta chamada.
   """

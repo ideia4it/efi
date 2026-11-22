@@ -25,8 +25,10 @@ E em `config/test.exs`, sem credenciais nem certificado (a seção 8 mostra o cl
 config :my_app, :efi, pix_key: "chave-pix-de-teste", webhook_secret: "segredo-de-teste"
 ```
 
-`EFI_CERTIFICATE` é o `.p12` em Base64 (`base64 -i producao.p12`). O segredo do webhook vai na
-query string da URL cadastrada; tire-o dos logs em `config/config.exs`:
+`EFI_CERTIFICATE` é o `.p12` em Base64 (`base64 < producao.p12`). O `base64` do Linux quebra a
+linha a cada 76 caracteres, por isso o `Base.decode64!/2` do `MyApp.Efi` ignora espaços e
+quebras de linha. O segredo do webhook vai na query string da URL cadastrada; tire-o dos logs em
+`config/config.exs`:
 
 ```elixir
 config :phoenix, :filter_parameters, ["password", "hmac"]
@@ -56,7 +58,7 @@ defmodule MyApp.Efi do
   defp build_client(config) do
     {:ok, certificate} =
       config[:certificate]
-      |> Base.decode64!()
+      |> Base.decode64!(ignore: :whitespace)
       |> Efi.Certificate.from_p12()
 
     {:ok, client} =
@@ -172,7 +174,8 @@ defmodule MyAppWeb.CheckoutLive do
 end
 ```
 
-`imagemQrcode` já vem como data URI (`data:image/png;base64,...`).
+`imagemQrcode` já vem como data URI (no exemplo da Efí, `data:image/svg+xml;base64,...`) e vai
+direto no `src`.
 
 ## 5. Receber o webhook
 
@@ -245,15 +248,20 @@ Efi.Pix.Webhook.configure(MyApp.Efi.client(), config[:pix_key], %{"webhookUrl" =
   notificação de teste do cadastro e as de verdade.
 - `skip_mtls_checking: true` é para quem está atrás de um proxy que encerra o TLS (Fly.io,
   Heroku, Render): a Efí testa o mTLS do servidor no cadastro, e o certificado dela nunca chega
-  ao app. Quem termina o TLS no próprio servidor pode exigir o certificado da Efí e dispensar o
-  header.
+  ao app. O header que essa opção manda não está na documentação da Efí; vem dos SDKs oficiais.
+  Quem termina o TLS no próprio servidor pode exigir o certificado da Efí e dispensar o header.
 - A Efí envia de um IP fixo (está na documentação do webhook); filtrar por ele é uma camada a
   mais.
 
 ## 7. Boleto, carnê e cartão: notificações da API Cobranças
 
 A API Cobranças não manda o conteúdo da mudança: ela faz `POST` com `notification=<token>` na
-`notification_url` da cobrança, e o app consulta o token.
+`notification_url` da cobrança, e o app consulta o token. A rota vai no mesmo escopo
+`/webhooks` da seção 5:
+
+```elixir
+post "/efi/cobrancas", EfiWebhookController, :charges
+```
 
 ```elixir
 def charges(conn, %{"notification" => token}) do

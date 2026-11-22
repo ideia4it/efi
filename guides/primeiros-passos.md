@@ -10,11 +10,13 @@ def deps do
 end
 ```
 
-As APIs com mTLS precisam do executável `openssl` no servidor para abrir o `.p12`. Em imagens
-Debian ou Ubuntu ele já vem; em Alpine, `apk add openssl`. Certificados antigos usam uma cifra
-que o OpenSSL 3 moveu para o provider legacy: se `Efi.Certificate.from_p12/3` voltar com
-`:legacy_provider_missing`, instale o pacote do provider (`openssl-provider-legacy` no Debian 13)
-ou converta o arquivo para PEM uma vez e use `Efi.Certificate.from_pem/1`.
+As APIs com mTLS precisam do executável `openssl` no servidor para abrir o `.p12`. As imagens
+Docker mínimas (Debian slim, Alpine) não o trazem: instale o pacote `openssl` (`apt-get install
+openssl`, `apk add openssl`). O Dockerfile do `mix phx.gen.release --docker` já o instala.
+Certificados antigos usam uma cifra que o OpenSSL 3 moveu para o provider legacy: se
+`Efi.Certificate.from_p12/3` voltar com `:legacy_provider_missing`, instale o pacote do provider
+(`openssl-provider-legacy` no Debian 13) ou converta o arquivo para PEM uma vez e use
+`Efi.Certificate.from_pem/1`.
 
 ## Credenciais e certificado
 
@@ -22,13 +24,15 @@ Na conta Efí, em **API > Aplicações**, crie uma aplicação e habilite as API
 usar. Cada aplicação tem um par `Client_Id`/`Client_Secret` de produção e outro de homologação, e
 cada ambiente tem o próprio certificado `.p12`, gerado em **API > Meus certificados**.
 
-Guarde o certificado como segredo do ambiente, em Base64, e abra na subida do app:
+Guarde o certificado como segredo do ambiente, em Base64 (`base64 < producao.p12`), e abra na
+subida do app. O `base64` do Linux quebra a linha a cada 76 caracteres; `ignore: :whitespace`
+aceita as quebras:
 
 ```elixir
 {:ok, certificate} =
   "EFI_CERTIFICATE"
   |> System.fetch_env!()
-  |> Base.decode64!()
+  |> Base.decode64!(ignore: :whitespace)
   |> Efi.Certificate.from_p12()
 ```
 
@@ -139,5 +143,6 @@ delas voltam `%Efi.Error{kind: :configuration, reason: {:environment, :unsupport
 ## Testes no seu app
 
 A biblioteca fala HTTP só pelo `Req`, então os testes do app usam `Req.Test` passando
-`req_options: [plug: {Req.Test, MyApp.EfiStub}]` no cliente. Com um `token_store` que devolve um
-token fixo, o stub nem precisa simular o pedido do token.
+`req_options: [plug: {Req.Test, MyApp.EfiStub}, retry: false]` no cliente. Sem o `retry: false`,
+um 500 ou 503 simulado numa leitura é repetido três vezes, com 7 segundos de espera no total.
+Com um `token_store` que devolve um token fixo, o stub nem precisa simular o pedido do token.

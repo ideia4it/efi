@@ -8,7 +8,7 @@ defmodule Efi.Pix.InfractionTest do
   @defended "8ad75c93-6150-422c-929e-822f361c7a6b"
   @expired "1f0c2d4e-6150-422c-929e-822f361c7a6b"
 
-  test "lists the month's MED infractions, defends one and is told the deadline passed for another" do
+  test "lists the month's MED infractions, defends one, is told it was already defended and that the deadline passed for another" do
     client = Efi.Test.client()
 
     defense = %{
@@ -41,8 +41,34 @@ defmodule Efi.Pix.InfractionTest do
 
     Efi.Test.expect(
       :post,
+      "pix-h.api.efipay.com.br/v2/gn/infracoes/#{@defended}/defesa",
+      fn conn, body ->
+        assert body == defense
+
+        conn
+        |> Plug.Conn.put_status(409)
+        |> Req.Test.json(%{
+          "type" => "https://pix.bcb.gov.br/api/v2/error/InfracaoOperacaoInvalida",
+          "title" => "Operação Inválida",
+          "status" => 409,
+          "detail" =>
+            "A requisição que busca apresentar uma defesa de infração não respeita o schema ou está semanticamente errada.",
+          "violacoes" => [
+            %{
+              "razao" => "A defesa para essa infração já foi criada.",
+              "propriedade" => "body.infractionId"
+            }
+          ]
+        })
+      end
+    )
+
+    Efi.Test.expect(
+      :post,
       "pix-h.api.efipay.com.br/v2/gn/infracoes/#{@expired}/defesa",
-      fn conn, _body ->
+      fn conn, body ->
+        assert body == defense
+
         conn
         |> Plug.Conn.put_status(422)
         |> Req.Test.json(%{
@@ -68,6 +94,9 @@ defmodule Efi.Pix.InfractionTest do
              })
 
     assert {:ok, nil} = Infraction.submit_defense(client, @defended, defense)
+
+    assert {:error, %Efi.Error{kind: :conflict, name: "InfracaoOperacaoInvalida"}} =
+             Infraction.submit_defense(client, @defended, defense)
 
     assert {:error,
             %Efi.Error{

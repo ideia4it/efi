@@ -41,9 +41,11 @@ defmodule Efi.Pix.Send do
   `gn.qrcodes.pay` e `gn.qrcodes.read`: o parceiro não envia Pix por ela.
 
   Em produção, cada conta tem um limite diário de envio pré-aprovado, e só conta Efí Empresas
-  pode alterá-lo. Envio para chave também consome fichas do balde da conta: com o balde vazio, a
-  Efí devolve 429 (`balde_fichas_vazio`). Consulte as fichas em
-  `Efi.Pix.Account.get_key_buckets/2`.
+  pode alterá-lo. Envio para chave também consome fichas do balde da conta. Com o balde vazio, o
+  envio volta `%Efi.Error{kind: :rate_limited}` com `error.headers["retry-after"]`, os segundos
+  que a Efí pede para esperar, e a biblioteca não repete o envio sozinha. A Efí informa as fichas
+  restantes no header `Bucket-Size` das respostas do envio, mas a biblioteca só devolve headers
+  no erro: para saber as fichas antes de enviar, use `Efi.Pix.Account.get_key_buckets/2`.
 
   ## Homologação
 

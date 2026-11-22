@@ -95,6 +95,27 @@ defmodule Efi.Pix.SendTest do
              })
   end
 
+  test "finds the token bucket empty and reads from the error how many seconds to wait before sending again" do
+    client = Efi.Test.client()
+
+    Efi.Test.expect(:put, "pix-h.api.efipay.com.br/v3/gn/pix/#{@send_id}", fn conn, _body ->
+      conn
+      |> Plug.Conn.put_resp_header("bucket-size", "0")
+      |> Plug.Conn.put_resp_header("retry-after", "30")
+      |> Plug.Conn.put_status(429)
+      |> Req.Test.json(%{
+        "nome" => "balde_fichas_vazio",
+        "mensagem" => "Não há fichas no balde a serem consumidas"
+      })
+    end)
+
+    assert {:error, %Efi.Error{kind: :rate_limited, name: "balde_fichas_vazio"} = error} =
+             Send.send(client, @send_id, @transfer)
+
+    assert error.headers["retry-after"] == ["30"]
+    assert error.headers["bucket-size"] == ["0"]
+  end
+
   test "moves money to another account of the same owner and is told when the idEnvio was already used" do
     client = Efi.Test.client()
     path = "pix-h.api.efipay.com.br/v2/gn/pix/#{@send_id}/mesma-titularidade"

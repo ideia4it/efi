@@ -3,8 +3,9 @@ defmodule Efi.Charges.Charge do
   Transação da API Cobranças: a cobrança por boleto (Bolix, com QR Code Pix), cartão de crédito
   ou link de pagamento, identificada pelo `charge_id`.
 
-  Valores são inteiros em centavos (`5990` é R$ 59,90). Toda resposta vem embrulhada no formato
-  da API Cobranças, `%{"code" => 200, "data" => ...}`.
+  Valores são inteiros em centavos (`5990` é R$ 59,90). As respostas vêm no formato da API
+  Cobranças, `%{"code" => 200, "data" => ...}`, e as que só confirmam a ação (cancelar,
+  reenviar, baixa manual, histórico, metadata e vencimento) trazem só `%{"code" => 200}`.
 
   ## Um passo ou dois
 
@@ -26,7 +27,9 @@ defmodule Efi.Charges.Charge do
         })
 
   No boleto, `configurations.days_to_write_off` define em quantos dias (de 0 a 120) depois do
-  vencimento o boleto deixa de ser pagável e vai a `expired`. `message` aceita até 4 linhas de
+  vencimento o boleto deixa de ser pagável e vai a `expired`. Os juros de
+  `configurations.interest` são diários (`33` é 0,033% ao dia); para juros mensais, mande
+  `"interest" => %{"value" => 330, "type" => "monthly"}`. `message` aceita até 4 linhas de
   100 caracteres, separadas por `\\n`. Cartão de crédito exige o `payment_token` gerado no
   navegador: veja `Efi.Charges.Card`.
 

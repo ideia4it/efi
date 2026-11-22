@@ -72,9 +72,10 @@ defmodule Efi.Client do
     * `:skip_mtls_checking` - com `true`, envia `x-skip-mtls-checking: true` ao cadastrar um
       webhook. Use quando o servidor do webhook não valida o certificado da Efí, como atrás de
       um proxy que encerra o TLS (Fly.io, Heroku, Render), e proteja a URL de outra forma. A
-      documentação da Efí não descreve esse header: ele vem dos SDKs oficiais, que o mandam no
-      cadastro do webhook do Pix, do Pix Automático, do Pagamento de Contas e da Abertura de
-      Contas;
+      documentação da Efí não descreve esse header: ele vem dos SDKs oficiais, e o de Node
+      (`validateMtls: false`) o manda no cadastro dos webhooks do Pix, do Pix Automático, do
+      Pagamento de Contas e da Abertura de Contas. No webhook Pix ele funciona em produção;
+      nos outros, confirme na homologação;
     * `:headers` - headers extras;
     * `:receive_timeout` - sobrescreve o do cliente só nesta chamada.
   """
@@ -172,7 +173,9 @@ defmodule Efi.Client do
     * `:environment` - obrigatória, `:production` ou `:sandbox` (homologação);
     * `:certificate` - um `Efi.Certificate`, obrigatório para todas as APIs menos Cobranças;
     * `:token_store` - um módulo que implementa `Efi.TokenStore`;
-    * `:partner_token` - o identificador de parceiro Efí, enviado no header `partner-token`;
+    * `:partner_token` - o identificador de parceiro Efí, enviado no header `partner-token` das
+      chamadas às APIs. A documentação da Efí não descreve o header; ele vem dos SDKs oficiais
+      de PHP, Python e Node, que o mandam nas chamadas às APIs;
     * `:receive_timeout` - em milissegundos, padrão `30_000`;
     * `:req_options` - mesclado por último nas opções do `Req`, vence os padrões. Headers e
       `params` daqui se somam aos da biblioteca em vez de trocá-los.

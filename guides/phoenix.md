@@ -248,8 +248,9 @@ Efi.Pix.Webhook.configure(MyApp.Efi.client(), config[:pix_key], %{"webhookUrl" =
   notificação de teste do cadastro e as de verdade.
 - `skip_mtls_checking: true` é para quem está atrás de um proxy que encerra o TLS (Fly.io,
   Heroku, Render): a Efí testa o mTLS do servidor no cadastro, e o certificado dela nunca chega
-  ao app. O header que essa opção manda não está na documentação da Efí; vem dos SDKs oficiais.
-  Quem termina o TLS no próprio servidor pode exigir o certificado da Efí e dispensar o header.
+  ao app. O header que essa opção manda não está na documentação da Efí; vem dos SDKs oficiais
+  e funciona em produção no webhook Pix. Quem termina o TLS no próprio servidor pode exigir o
+  certificado da Efí e dispensar o header.
 - A Efí envia de um IP fixo (está na documentação do webhook); filtrar por ele é uma camada a
   mais.
 

@@ -53,13 +53,14 @@ Render), o certificado nunca chega ao app. Para esse caso, `skip_mtls_checking: 
 header `x-skip-mtls-checking`, que pede à Efí para pular o teste, e a URL passa a ser protegida
 por um segredo próprio (o guia "Integração com Phoenix" mostra como conferir).
 
-O webhook não é opcional: sem ele, o pedido de abertura volta com 412
-`webhook_nao_cadastrado`. E nenhuma página da documentação da Efí cita o header de pular o mTLS:
-ele vem dos SDKs oficiais, e o de Node o manda também no cadastro deste webhook. **Confirme na
-homologação antes de planejar o resto.** Se a Efí recusar o header aqui, o servidor do webhook
-precisa fazer o mTLS de verdade: encerrar o TLS no próprio app (no Fly.io, um serviço TCP sem o
-handler de TLS) ou pôr na frente um proxy que exija o certificado da Efí, como o Nginx do
-repositório `efipay/mtls-webhook`.
+O webhook não é opcional: sem ele, o pedido de abertura volta com 412 `webhook_nao_cadastrado`.
+E nenhuma página da documentação da Efí cita o header de pular o mTLS. Ele vem dos SDKs
+oficiais: o de Node, com `validateMtls: false`, o manda no cadastro dos webhooks do Pix, da
+Abertura de Contas e do Pagamento de Contas. No webhook Pix ele funciona em produção; na
+Abertura de Contas, ainda não há confirmação. **Confirme na homologação antes de planejar o
+resto.** Se a Efí recusar o header aqui, o servidor do webhook precisa fazer o mTLS de verdade:
+encerrar o TLS no próprio app (no Fly.io, um serviço TCP sem o handler de TLS) ou pôr na frente
+um proxy que exija o certificado da Efí, como o Nginx do repositório `efipay/mtls-webhook`.
 
 ## 3. Pedir a abertura da conta
 
@@ -181,3 +182,8 @@ Os SDKs oficiais aceitam um `partner_token` e o mandam no header `partner-token`
 a todas as APIs. A documentação da Efí não descreve esse header nem o que ele muda. Se a Efí te
 deu um identificador de parceiro, passe-o como `partner_token:` no `Efi.Client.new/1`, e a
 biblioteca faz o mesmo.
+
+Os SDKs de PHP, Ruby e Java têm ainda duas rotas de parceiro na API Cobranças,
+`POST /v1/partner/charge/one-step` e `POST /v1/partner/charge/:id/pay`, que existem no servidor
+mas não estão na documentação. A biblioteca não as implementa. Se a sua parceria envolve
+cobranças por boleto ou cartão, pergunte delas ao representante comercial.

@@ -1365,7 +1365,7 @@
   "family": "pix",
   "method": "POST",
   "path": "/v2/gn/qrcodes/detalhar",
-  "scope": null,
-  "doc": null
+  "scope": "gn.qrcodes.read",
+  "doc": "https://dev.efipay.com.br/en/docs/api-pix/envio-pagamento-pix#detail-qr-code-pix"
  }
 ]

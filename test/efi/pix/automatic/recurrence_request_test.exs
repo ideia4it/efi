@@ -70,8 +70,9 @@ defmodule Efi.Pix.Automatic.RecurrenceRequestTest do
   test "refuses to cancel a request the payer already answered" do
     client = Efi.Test.client()
 
-    Efi.Test.expect(:patch, "pix-h.api.efipay.com.br/v2/solicrec/#{@request_id}", fn conn,
-                                                                                     _body ->
+    Efi.Test.expect(:patch, "pix-h.api.efipay.com.br/v2/solicrec/#{@request_id}", fn conn, body ->
+      assert body == %{"status" => "CANCELADA"}
+
       conn
       |> Plug.Conn.put_status(400)
       |> Req.Test.json(%{

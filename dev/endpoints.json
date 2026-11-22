@@ -1335,8 +1335,8 @@
   "family": "pix",
   "method": "GET",
   "path": "/v2/gn/chaves/balde",
-  "scope": null,
-  "doc": null
+  "scope": "gn.keys.bucket.read",
+  "doc": "https://dev.efipay.com.br/docs/api-pix/endpoints-exclusivos-efi#consultar-baldes-de-fichas"
  },
  {
   "family": "cobrancas",
@@ -1365,7 +1365,7 @@
   "family": "pix",
   "method": "POST",
   "path": "/v2/gn/qrcodes/detalhar",
-  "scope": null,
-  "doc": null
+  "scope": "gn.qrcodes.read",
+  "doc": "https://dev.efipay.com.br/en/docs/api-pix/envio-pagamento-pix#detail-qr-code-pix"
  }
 ]

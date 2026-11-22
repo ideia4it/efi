@@ -41,9 +41,11 @@ defmodule Efi.Pix.Send do
   `gn.qrcodes.pay` e `gn.qrcodes.read`: o parceiro não envia Pix por ela.
 
   Em produção, cada conta tem um limite diário de envio pré-aprovado, e só conta Efí Empresas
-  pode alterá-lo. Envio para chave também consome fichas do balde da conta: com o balde vazio, a
-  Efí devolve 429 (`balde_fichas_vazio`). Consulte as fichas em
-  `Efi.Pix.Account.get_key_buckets/2`.
+  pode alterá-lo. Envio para chave também consome fichas do balde da conta. Com o balde vazio, o
+  envio volta `%Efi.Error{kind: :rate_limited}` com `error.headers["retry-after"]`, os segundos
+  que a Efí pede para esperar, e a biblioteca não repete o envio sozinha. A Efí informa as fichas
+  restantes no header `Bucket-Size` das respostas do envio, mas a biblioteca só devolve headers
+  no erro: para saber as fichas antes de enviar, use `Efi.Pix.Account.get_key_buckets/2`.
 
   ## Homologação
 
@@ -126,15 +128,19 @@ defmodule Efi.Pix.Send do
   end
 
   @doc """
-  Lê um QR Code pelo `pixCopiaECola` e devolve os dados da cobrança (recebedor, valor) sem
-  pagar. É opcional: serve para conferir antes de chamar `pay_qr_code/4`.
+  Lê um QR Code pelo `pixCopiaECola` e devolve os dados da cobrança (`tipoCob`, `txid`,
+  status, devedor, recebedor, valor) sem pagar. É opcional: serve para conferir antes de chamar
+  `pay_qr_code/4`. A Efí recusa QR Code estático, não atende em homologação e cobra fichas do
+  balde, como no envio.
 
-  A Efí lista esta rota nos limites de consumo e cita o detalhamento na seção de pagamento de
-  QR Code, mas não documenta o escopo nem a resposta.
+  A doc em português só cita esta rota na seção de
+  [pagamento de QR Code](https://dev.efipay.com.br/docs/api-pix/envio-pagamento-pix#pagar-qr-code-pix).
+  A seção dela continua na doc em inglês, que avisa: o escopo `gn.qrcodes.read` está em
+  manutenção, e a rota fica indisponível até a Efí reativá-lo.
 
-  `POST /v2/gn/qrcodes/detalhar`
+  `POST /v2/gn/qrcodes/detalhar` · escopo `gn.qrcodes.read`
 
-  [Documentação da Efí](https://dev.efipay.com.br/docs/api-pix/envio-pagamento-pix#pagar-qr-code-pix)
+  [Documentação da Efí](https://dev.efipay.com.br/en/docs/api-pix/envio-pagamento-pix#detail-qr-code-pix)
   """
   @spec detail_qr_code(Client.t(), map(), keyword()) :: Efi.result()
   def detail_qr_code(%Client{} = client, body, opts \\ []) do

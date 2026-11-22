@@ -17,10 +17,10 @@ defmodule Efi.Pix.Infraction do
         "justificativa" => "Serviço prestado no Studio Ana em 12/11, com agendamento confirmado."
       })
 
-  Cada infração aceita uma defesa só (a segunda volta como `%Efi.Error{kind: :conflict}`), até
-  o prazo em `dadosAnalise.prazoFinalizacao` (depois dele, `%Efi.Error{kind: :validation}`,
-  status 422). A defesa pela API não substitui o ticket: ela não aceita anexos, e o analista da
-  Efí pode pedir documentos pelo ticket. As duas rotas não funcionam em homologação.
+  Cada infração aceita uma defesa só (a segunda volta como `%Efi.Error{kind: :conflict}`), e só
+  dentro do prazo de defesa: fora dele, volta `%Efi.Error{kind: :validation}`, status 422. A
+  defesa pela API não substitui o ticket: ela não aceita anexos, e o analista da Efí pode pedir
+  documentos pelo ticket. As duas rotas não funcionam em homologação.
   """
 
   alias Efi.Client

@@ -11,10 +11,21 @@ defmodule Efi.Pix.Automatic.RecurrenceTest do
   test "signs a customer up with a QR Code that also pays the first month, fixes the payer's name, sees the approval and finds the plan in the month's list" do
     client = Efi.Test.client()
 
+    plan = %{
+      "vinculo" => %{
+        "contrato" => "plano-mensal-0001",
+        "devedor" => %{"cpf" => "12345678909", "nome" => "Cliente do Studio Ana"},
+        "objeto" => "Plano mensal de escova"
+      },
+      "calendario" => %{"dataInicial" => "2026-12-01", "periodicidade" => "MENSAL"},
+      "valor" => %{"valorRec" => "150.00"},
+      "politicaRetentativa" => "PERMITE_3R_7D",
+      "loc" => 108,
+      "ativacao" => %{"dadosJornada" => %{"txid" => @immediate_txid}}
+    }
+
     Efi.Test.expect(:post, "pix-h.api.efipay.com.br/v2/rec", fn conn, body ->
-      assert body["loc"] == 108
-      assert body["valor"] == %{"valorRec" => "150.00"}
-      assert body["ativacao"] == %{"dadosJornada" => %{"txid" => @immediate_txid}}
+      assert body == plan
 
       conn
       |> Plug.Conn.put_status(201)
@@ -61,18 +72,7 @@ defmodule Efi.Pix.Automatic.RecurrenceTest do
     end)
 
     assert {:ok, %{"idRec" => @recurrence_id, "status" => "CRIADA"}} =
-             Recurrence.create(client, %{
-               "vinculo" => %{
-                 "contrato" => "plano-mensal-0001",
-                 "devedor" => %{"cpf" => "12345678909", "nome" => "Cliente do Studio Ana"},
-                 "objeto" => "Plano mensal de escova"
-               },
-               "calendario" => %{"dataInicial" => "2026-12-01", "periodicidade" => "MENSAL"},
-               "valor" => %{"valorRec" => "150.00"},
-               "politicaRetentativa" => "PERMITE_3R_7D",
-               "loc" => 108,
-               "ativacao" => %{"dadosJornada" => %{"txid" => @immediate_txid}}
-             })
+             Recurrence.create(client, plan)
 
     assert {:ok, %{"vinculo" => %{"devedor" => %{"nome" => "Cliente Fiel do Studio Ana"}}}} =
              Recurrence.update(client, @recurrence_id, %{
@@ -95,7 +95,11 @@ defmodule Efi.Pix.Automatic.RecurrenceTest do
   test "reports a recurrence that breaks the schema with the Central Bank error name and the violated field" do
     client = Efi.Test.client()
 
-    Efi.Test.expect(:post, "pix-h.api.efipay.com.br/v2/rec", fn conn, _body ->
+    Efi.Test.expect(:post, "pix-h.api.efipay.com.br/v2/rec", fn conn, body ->
+      assert body == %{
+               "calendario" => %{"dataInicial" => "01/12/2026", "periodicidade" => "MENSAL"}
+             }
+
       conn
       |> Plug.Conn.put_status(400)
       |> Req.Test.json(%{

@@ -7,11 +7,31 @@ defmodule Efi.Pix.ReportTest do
 
   @report_id "b02c2b3a-0ab2-4ab5-bc8e-b3ce607e7829"
 
-  test "requests yesterday's reconciliation statement, polls while it is processing and downloads the CSV" do
+  test "is told only past days have a reconciliation statement, requests yesterday's, polls while it is processing and downloads the CSV" do
     client = Efi.Test.client()
 
     csv =
       "CA;Efi;364;1;517613;Studio Ana;2026-11-19;2026-11-18;Extrato de Conciliação API Pix;1.0\n"
+
+    Efi.Test.expect(
+      :post,
+      "pix-h.api.efipay.com.br/v2/gn/relatorios/extrato-conciliacao",
+      fn conn, body ->
+        assert body == %{
+                 "dataMovimento" => "2026-11-19",
+                 "tipoRegistros" => %{"pixRecebido" => true}
+               }
+
+        conn
+        |> Plug.Conn.put_status(400)
+        |> Req.Test.json(%{
+          "type" => "https://pix.example.com/v2/gn/ExtratoConciliacaoConsultaInvalida",
+          "title" => "Consulta inválida",
+          "status" => 400,
+          "detail" => "A data do extrato de conciliação deve ser anterior à data corrente"
+        })
+      end
+    )
 
     Efi.Test.expect(
       :post,
@@ -41,6 +61,12 @@ defmodule Efi.Pix.ReportTest do
       |> Plug.Conn.put_resp_content_type("text/csv")
       |> Plug.Conn.send_resp(200, csv)
     end)
+
+    assert {:error, %Efi.Error{kind: :validation, name: "ExtratoConciliacaoConsultaInvalida"}} =
+             Report.create_reconciliation(client, %{
+               "dataMovimento" => "2026-11-19",
+               "tipoRegistros" => %{"pixRecebido" => true}
+             })
 
     assert {:ok, %{"id" => @report_id, "status" => "AGUARDANDO_PROCESSAMENTO"}} =
              Report.create_reconciliation(client, %{

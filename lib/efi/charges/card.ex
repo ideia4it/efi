@@ -9,14 +9,16 @@ defmodule Efi.Charges.Card do
   ([js-payment-token-efi](https://github.com/efipay/js-payment-token-efi)), com o
   identificador de conta (`payee_code`) da conta Efí. Nunca no servidor: assim o número do
   cartão não passa pelo app, e a Efí descontinuou a geração pelo back-end. Com `reuse: true` na
-  biblioteca, o token pode ser usado de novo em cobranças recorrentes.
+  biblioteca, o token pode ser usado de novo, mas cobrar sem o pagador na tela, como numa
+  mensalidade, só pela assinatura (`Efi.Charges.Subscription`).
 
   ## Cobrança com 3DS
 
   `create/3` é a rota que a Efí recomenda para integrações novas. Na biblioteca JavaScript,
   gere o token com `enable3ds: true` e o valor total em `totalValue` para receber também o
   `tds_identifier`. `customer`, `payment_token` e `installments` vão na raiz do corpo, e
-  `tds_info` é obrigatório.
+  `tds_info` é obrigatório. Toda cobrança 3DS exige o pagador presente: com um token já salvo,
+  gere no navegador um `tds_identifier` novo para o valor da cobrança (`get3dsIdentifier`).
 
       {:ok, charge} =
         Efi.Charges.Card.create(client, %{
@@ -46,7 +48,8 @@ defmodule Efi.Charges.Card do
   `error_description` do resto da API Cobranças. `Efi.Error` lê os dois.
 
   Cobrança de cartão sem 3DS usa `Efi.Charges.Charge.create_one_step/3` ou
-  `Efi.Charges.Charge.set_payment_method/4` com `payment.credit_card`.
+  `Efi.Charges.Charge.set_payment_method/4` com `payment.credit_card`. A Efí avisa que essa
+  rota antiga de pagamento será descontinuada, em data ainda não anunciada.
 
   ## Homologação
 
@@ -77,8 +80,8 @@ defmodule Efi.Charges.Card do
 
   @doc """
   Tenta de novo o pagamento de uma cobrança de cartão `unpaid`, recusada por limite, dado
-  errado ou falha temporária, sem emitir outra cobrança. Com `"update_card" => true` em
-  `payment.credit_card`, o cartão novo passa a ser o da cobrança.
+  errado ou falha temporária, sem emitir outra cobrança. O exemplo da Efí manda
+  `"update_card" => true` em `payment.credit_card` junto do cartão novo, sem descrever o campo.
 
   Vale também para a cobrança de uma assinatura: se a retentativa paga a última cobrança
   pendente de uma assinatura cancelada, a assinatura volta a ficar ativa.

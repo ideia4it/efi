@@ -71,7 +71,10 @@ defmodule Efi.Client do
       exigem a chave a recebem como argumento, então esta opção só serve para outra rota;
     * `:skip_mtls_checking` - com `true`, envia `x-skip-mtls-checking: true` ao cadastrar um
       webhook. Use quando o servidor do webhook não valida o certificado da Efí, como atrás de
-      um proxy que encerra o TLS (Fly.io, Heroku, Render), e proteja a URL de outra forma;
+      um proxy que encerra o TLS (Fly.io, Heroku, Render), e proteja a URL de outra forma. A
+      documentação da Efí não descreve esse header: ele vem dos SDKs oficiais, que o mandam no
+      cadastro do webhook do Pix, do Pix Automático, do Pagamento de Contas e da Abertura de
+      Contas;
     * `:headers` - headers extras;
     * `:receive_timeout` - sobrescreve o do cliente só nesta chamada.
   """
@@ -93,8 +96,13 @@ defmodule Efi.Client do
     req_options: []
   ]
 
+  @typedoc "Uma API da Efí. Cada uma tem host, rota de token e escopos próprios (veja a tabela acima)."
   @type api :: :pix | :charges | :open_finance | :accounts | :bill_payments | :statements
+
+  @typedoc "`:production` ou `:sandbox` (homologação)."
   @type environment :: :production | :sandbox
+
+  @typedoc "Cliente montado por `new/1`, com as opções descritas lá."
 
   @type t :: %__MODULE__{
           client_id: String.t(),
@@ -337,15 +345,21 @@ defmodule Efi.Client do
     |> build_request(client, api, client.receive_timeout)
     |> Req.request()
     |> case do
-      {:ok, %Req.Response{status: status} = response} when status in 200..299 ->
-        {:ok, Token.from_response(decode(response), DateTime.utc_now())}
+      {:ok, %Req.Response{} = response} -> token_from_response(response)
+      {:error, exception} -> {:error, %Error{kind: :transport, reason: exception}}
+    end
+  end
 
-      {:ok, %Req.Response{status: status} = response} ->
-        error = Error.from_response(status, decode(response), response.headers)
+  # Um 2xx sem `access_token`, como a página HTML de um proxy, também é falha do pedido do token.
+  defp token_from_response(%Req.Response{status: status} = response) do
+    case decode(response) do
+      %{"access_token" => access_token} = body
+      when status in 200..299 and is_binary(access_token) ->
+        {:ok, Token.from_response(body, DateTime.utc_now())}
+
+      body ->
+        error = Error.from_response(status, body, response.headers)
         {:error, %{error | kind: :authentication}}
-
-      {:error, exception} ->
-        {:error, %Error{kind: :transport, reason: exception}}
     end
   end
 

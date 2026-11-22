@@ -88,8 +88,13 @@ defmodule Efi.Certificate do
   @enforce_keys [:certificate, :key, :chain, :not_before, :not_after]
   defstruct [:certificate, :key, :chain, :not_before, :not_after]
 
+  @typedoc "Chave privada em DER, com o tipo que o `:ssl` espera."
   @type private_key :: {:PrivateKeyInfo | :RSAPrivateKey | :ECPrivateKey, binary()}
 
+  @typedoc """
+  Certificado aberto: o da aplicação e a chave, em DER; os outros certificados do arquivo em
+  `chain`; e a validade.
+  """
   @type t :: %__MODULE__{
           certificate: binary(),
           key: private_key(),
@@ -130,6 +135,11 @@ defmodule Efi.Certificate do
   Aceita o que o `openssl pkcs12 -nodes` escreve: a chave em PKCS#8 (`PRIVATE KEY`), RSA ou EC,
   e um ou mais certificados. O certificado da aplicação é o que tem a chave pública da chave
   privada do arquivo; os demais vão para `chain`.
+
+  Com o certificado e a chave em arquivos separados, como nos comandos `-clcerts -nokeys` e
+  `-nocerts -nodes` da documentação da Efí, junte os dois:
+
+      Efi.Certificate.from_pem(File.read!("certificado.pem") <> File.read!("chave.pem"))
   """
   @spec from_pem(binary()) :: {:ok, t()} | {:error, Error.t()}
   def from_pem(pem) when is_binary(pem) do

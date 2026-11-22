@@ -21,13 +21,24 @@ defmodule Efi.Error do
   | `:configuration` | falta algo no `%Efi.Client{}` para chamar aquela API, ou a API não existe no ambiente dele |
 
   `name` e `message` vêm do corpo da resposta. Cada API da Efí devolve erro num formato, e todos
-  são lidos aqui: `nome`/`mensagem` (Pix, Open Finance, Abertura de Contas), o padrão do Banco
-  Central `type`/`title`/`detail` com `violacoes`, e `error`/`error_description` (Cobranças e
-  OAuth), além de `descricao` (Pagamento de Contas). O corpo inteiro fica em `body`, para quem
-  precisa de um campo que não foi normalizado, e os headers da resposta em `headers`: num 429, o
-  `retry-after` diz quantos segundos esperar.
+  são lidos aqui:
+
+  | Formato | Onde | `name` | `message` |
+  |---|---|---|---|
+  | `nome`, `mensagem` | Pix, Open Finance, Abertura de Contas, Pagamento de Contas, Extratos | `nome` | `mensagem` |
+  | `type`, `title`, `detail` | Pix, no padrão do Banco Central | fim do `type` | `detail` |
+  | `error`, `error_description` | Cobranças e escopo insuficiente no OAuth | `error` | `error_description` ou o `message` dentro dele |
+  | `title`, `status`, `detail` | Cobranças, no pagamento com cartão | | `detail` |
+  | `erro`, `descricao` | Pagamento de Contas | | `descricao` |
+
+  O detalhe por campo continua só em `body`, que guarda o corpo inteiro: `violacoes` (Pix),
+  `erros` (Pix, em payload locations), `extras` (Cobranças) e o `property` de
+  `error_description` (Cobranças). Os headers da resposta ficam em `headers`. No 429 do envio
+  de Pix (`PUT /v3/gn/pix/:idEnvio`), a Efí manda `retry-after`, com os segundos até tentar de
+  novo, e `bucket-size`, com as fichas que sobraram.
   """
 
+  @typedoc "O que deu errado, igual em todas as APIs (veja a primeira tabela)."
   @type kind ::
           :validation
           | :unauthorized
@@ -43,6 +54,10 @@ defmodule Efi.Error do
           | :certificate
           | :configuration
 
+  @typedoc """
+  `status`, `name`, `message`, `body` e `headers` vêm da resposta da Efí. `reason` explica os
+  erros que não têm resposta: `:transport`, `:certificate` e `:configuration`.
+  """
   @type t :: %__MODULE__{
           kind: kind(),
           status: pos_integer() | nil,

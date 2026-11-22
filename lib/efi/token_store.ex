@@ -9,11 +9,12 @@ defmodule Efi.TokenStore do
   A chave identifica a aplicação, o ambiente e a API, porque cada API da Efí emite o próprio
   token: `{api, environment, client_id}`.
 
-  O guia "Integração com Phoenix" tem uma implementação em ETS com poucas linhas. Qualquer cache
+  O guia "Primeiros passos" tem uma implementação em ETS com poucas linhas. Qualquer cache
   serve (Cachex, Nebulex, Redis), desde que `fetch/1` nunca levante: um erro do cache deve virar
   `:error`, e a chamada segue pedindo um token novo.
   """
 
+  @typedoc "Chave de um token: a API, o ambiente e o `client_id` da aplicação."
   @type key :: {Efi.Client.api(), Efi.Client.environment(), String.t()}
 
   @doc "Devolve o token guardado para `key`, vencido ou não, ou `:error` se não houver."

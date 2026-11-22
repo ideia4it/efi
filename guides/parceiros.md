@@ -49,16 +49,17 @@ Efi.Accounts.Webhook.configure(
 
 No cadastro, a Efí testa se o servidor exige o certificado dela (mTLS) e recusa com
 `mtls_nao_configurado` se não exigir. Atrás de um proxy que encerra o TLS (Fly.io, Heroku,
-Render), o certificado nunca chega ao app: o header `x-skip-mtls-checking`, que
-`skip_mtls_checking: true` envia, pula esse teste no webhook Pix, e a URL passa a ser protegida
+Render), o certificado nunca chega ao app. Para esse caso, `skip_mtls_checking: true` envia o
+header `x-skip-mtls-checking`, que pede à Efí para pular o teste, e a URL passa a ser protegida
 por um segredo próprio (o guia "Integração com Phoenix" mostra como conferir).
 
 O webhook não é opcional: sem ele, o pedido de abertura volta com 412
-`webhook_nao_cadastrado`. E a doc da Abertura de Contas não cita o header de pular o mTLS, só a
-do Pix o aceita com certeza. **Confirme na homologação antes de planejar o resto.** Se a Efí
-recusar o header aqui, o servidor do webhook precisa fazer o mTLS de verdade: encerrar o TLS no
-próprio app (no Fly.io, um serviço TCP sem o handler de TLS) ou pôr na frente um proxy que exija
-o certificado da Efí, como o Nginx do repositório `efipay/mtls-webhook`.
+`webhook_nao_cadastrado`. E nenhuma página da documentação da Efí cita o header de pular o mTLS:
+ele vem dos SDKs oficiais, e o de Node o manda também no cadastro deste webhook. **Confirme na
+homologação antes de planejar o resto.** Se a Efí recusar o header aqui, o servidor do webhook
+precisa fazer o mTLS de verdade: encerrar o TLS no próprio app (no Fly.io, um serviço TCP sem o
+handler de TLS) ou pôr na frente um proxy que exija o certificado da Efí, como o Nginx do
+repositório `efipay/mtls-webhook`.
 
 ## 3. Pedir a abertura da conta
 
@@ -174,8 +175,9 @@ cobranças dele:
 
 Em homologação, o favorecido precisa ser outra conta Efí válida: crie uma subconta para testar.
 
-## Comissão de parceiro na API Cobranças
+## Identificador de parceiro
 
-Se a Efí te deu um identificador de parceiro, passe-o como `partner_token:` no
-`Efi.Client.new/1`: ele vai no header `partner-token` de cada chamada, como fazem os SDKs
-oficiais.
+Os SDKs oficiais aceitam um `partner_token` e o mandam no header `partner-token` das chamadas
+a todas as APIs. A documentação da Efí não descreve esse header nem o que ele muda. Se a Efí te
+deu um identificador de parceiro, passe-o como `partner_token:` no `Efi.Client.new/1`, e a
+biblioteca faz o mesmo.

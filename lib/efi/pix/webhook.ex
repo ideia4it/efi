@@ -43,8 +43,8 @@ defmodule Efi.Pix.Webhook do
   configuração padrão, o app nunca vê o certificado da Efí, e sem mTLS o cadastro falha. Nesse
   caso, configure com `skip_mtls_checking: true`, que envia o header `x-skip-mtls-checking: true`
   e faz a Efí aceitar a URL sem testar o mTLS. A documentação da Efí não descreve esse header,
-  mas a Efí o aceita no cadastro e os SDKs oficiais o oferecem (no de Node, a opção
-  `skipMtlsChecking`):
+  mas a Efí o aceita no cadastro em produção e os SDKs oficiais o oferecem (no de Node, a opção
+  `validateMtls: false`):
 
       Efi.Pix.Webhook.configure(
         client,

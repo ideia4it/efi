@@ -103,7 +103,7 @@ defmodule Efi.BillPayments.Payment do
   """
   @spec get_summary(Client.t(), map() | keyword(), keyword()) :: Efi.result()
   def get_summary(%Client{} = client, params, opts \\ []) do
-    Client.request(client, :bill_payments, :get, "/v1/resumo", Keyword.put(opts, :params, params))
+    Client.request(client, :bill_payments, :get, "/v1/resumo", Client.put_params(opts, params))
   end
 
   defp barcode_path(barcode), do: Client.path("/v1/codBarras/:codBarras", codBarras: barcode)

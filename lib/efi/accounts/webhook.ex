@@ -83,7 +83,7 @@ defmodule Efi.Accounts.Webhook do
   """
   @spec list(Client.t(), map() | keyword(), keyword()) :: Efi.result()
   def list(%Client{} = client, params, opts \\ []) do
-    Client.request(client, :accounts, :get, "/v1/webhooks", Keyword.put(opts, :params, params))
+    Client.request(client, :accounts, :get, "/v1/webhooks", Client.put_params(opts, params))
   end
 
   @doc """

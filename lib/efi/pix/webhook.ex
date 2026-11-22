@@ -120,7 +120,7 @@ defmodule Efi.Pix.Webhook do
   """
   @spec list(Client.t(), map() | keyword(), keyword()) :: Efi.result()
   def list(%Client{} = client, params, opts \\ []) do
-    Client.request(client, :pix, :get, "/v2/webhook", Keyword.put(opts, :params, params))
+    Client.request(client, :pix, :get, "/v2/webhook", Client.put_params(opts, params))
   end
 
   @doc """

@@ -45,19 +45,41 @@ defmodule Efi.DocumentationTest do
       for module <- Documentation.api_modules(),
           {{^module, name, arity}, text} <- Documentation.function_docs(module),
           [{method, path}] = Documentation.routes(text),
-          arguments =
-            module
-            |> Documentation.parameter_names(name, arity)
-            |> Enum.map(&argument(&1, client)),
-          {:ok, called} = apply(module, name, arguments),
+          {:ok, called} = call(module, name, arity, client, []),
           called != "#{method} #{String.replace(path, ":param", @path_value)}",
           do: {module, name, called}
 
     assert mismatches == []
   end
 
-  defp argument(:client, client), do: client
-  defp argument(:opts, _client), do: []
-  defp argument(:params, _client), do: %{}
-  defp argument(_path_value_or_body, _client), do: @path_value
+  test "every API function keeps the optional query parameters passed in opts" do
+    client = Efi.Test.client(environment: :production)
+
+    Req.Test.stub(Efi.Test.stub(), fn conn ->
+      Req.Test.json(conn, conn.query_string)
+    end)
+
+    dropped =
+      for module <- Documentation.api_modules(),
+          {{^module, name, arity}, _text} <- Documentation.function_docs(module),
+          {:ok, query} = call(module, name, arity, client, params: %{"filtro" => "opcional"}),
+          not String.contains?(query, "filtro=opcional"),
+          do: {module, name}
+
+    assert dropped == []
+  end
+
+  defp call(module, name, arity, client, opts) do
+    arguments =
+      module
+      |> Documentation.parameter_names(name, arity)
+      |> Enum.map(&argument(&1, client, opts))
+
+    apply(module, name, arguments)
+  end
+
+  defp argument(:client, client, _opts), do: client
+  defp argument(:opts, _client, opts), do: opts
+  defp argument(:params, _client, _opts), do: %{}
+  defp argument(_path_value_or_body, _client, _opts), do: @path_value
 end

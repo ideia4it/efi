@@ -95,6 +95,6 @@ defmodule Efi.Pix.DueCharge do
   """
   @spec list(Client.t(), map() | keyword(), keyword()) :: Efi.result()
   def list(%Client{} = client, params, opts \\ []) do
-    Client.request(client, :pix, :get, "/v2/cobv", Keyword.put(opts, :params, params))
+    Client.request(client, :pix, :get, "/v2/cobv", Client.put_params(opts, params))
   end
 end

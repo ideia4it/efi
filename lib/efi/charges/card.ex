@@ -125,6 +125,6 @@ defmodule Efi.Charges.Card do
   """
   @spec list_installments(Client.t(), map() | keyword(), keyword()) :: Efi.result()
   def list_installments(%Client{} = client, params, opts \\ []) do
-    Client.request(client, :charges, :get, "/v1/installments", Keyword.put(opts, :params, params))
+    Client.request(client, :charges, :get, "/v1/installments", Client.put_params(opts, params))
   end
 end

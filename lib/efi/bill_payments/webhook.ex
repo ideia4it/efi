@@ -67,7 +67,7 @@ defmodule Efi.BillPayments.Webhook do
       :bill_payments,
       :get,
       "/v1/webhook",
-      Keyword.put(opts, :params, params)
+      Client.put_params(opts, params)
     )
   end
 

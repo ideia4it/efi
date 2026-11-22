@@ -148,7 +148,7 @@ defmodule Efi.Charges.Charge do
   """
   @spec list(Client.t(), map() | keyword(), keyword()) :: Efi.result()
   def list(%Client{} = client, params, opts \\ []) do
-    Client.request(client, :charges, :get, "/v1/charges", Keyword.put(opts, :params, params))
+    Client.request(client, :charges, :get, "/v1/charges", Client.put_params(opts, params))
   end
 
   @doc """

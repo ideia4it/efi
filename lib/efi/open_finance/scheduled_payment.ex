@@ -54,7 +54,7 @@ defmodule Efi.OpenFinance.ScheduledPayment do
   """
   @spec list(Client.t(), map() | keyword(), keyword()) :: Efi.result()
   def list(%Client{} = client, params, opts \\ []) do
-    opts = Keyword.put(opts, :params, params)
+    opts = Client.put_params(opts, params)
     Client.request(client, :open_finance, :get, "/v1/pagamentos-agendados/pix", opts)
   end
 

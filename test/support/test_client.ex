@@ -52,13 +52,12 @@ defmodule Efi.Test do
     end)
   end
 
-  @doc "Corpo da requisição decodificado, ou `nil` se veio vazio."
-  def json_body(conn) do
+  def stub, do: @stub
+
+  defp json_body(conn) do
     case Plug.Conn.read_body(conn) do
       {:ok, "", _conn} -> nil
       {:ok, body, _conn} -> Jason.decode!(body)
     end
   end
-
-  def stub, do: @stub
 end

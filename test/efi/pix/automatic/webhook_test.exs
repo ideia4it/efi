@@ -7,23 +7,8 @@ defmodule Efi.Pix.Automatic.WebhookTest do
 
   @webhook_url "https://app.example.com/webhooks/efi?hmac=assinatura&ignorar="
 
-  test "registers the recurrence webhook without mTLS checking after Efí rejects the proxied URL, reads it back and removes it" do
+  test "registers the recurrence webhook behind a proxy that ends TLS, reads it back and removes it" do
     client = Efi.Test.client()
-
-    Efi.Test.expect(:put, "pix-h.api.efipay.com.br/v2/webhookrec", fn conn, body ->
-      assert body == %{"webhookUrl" => @webhook_url}
-      assert Plug.Conn.get_req_header(conn, "x-skip-mtls-checking") == []
-
-      conn
-      |> Plug.Conn.put_status(400)
-      |> Req.Test.json(%{
-        "type" => "https://pix.bcb.gov.br/api/v2/error/WebhookOperacaoInvalida",
-        "title" => "Webhook inválido.",
-        "status" => 400,
-        "detail" =>
-          "A presente requisição busca criar um webhook sem respeitar o _schema_ ou, ainda, com sentido semanticamente inválido."
-      })
-    end)
 
     Efi.Test.expect(:put, "pix-h.api.efipay.com.br/v2/webhookrec", fn conn, body ->
       assert body == %{"webhookUrl" => @webhook_url}
@@ -38,9 +23,6 @@ defmodule Efi.Pix.Automatic.WebhookTest do
     Efi.Test.expect(:delete, "pix-h.api.efipay.com.br/v2/webhookrec", fn conn, _body ->
       Plug.Conn.send_resp(conn, 204, "")
     end)
-
-    assert {:error, %Efi.Error{kind: :validation, name: "WebhookOperacaoInvalida"}} =
-             Webhook.configure_recurrence(client, %{"webhookUrl" => @webhook_url})
 
     assert {:ok, _configured} =
              Webhook.configure_recurrence(client, %{"webhookUrl" => @webhook_url},

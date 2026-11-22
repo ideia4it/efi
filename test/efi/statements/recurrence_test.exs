@@ -17,7 +17,9 @@ defmodule Efi.Statements.RecurrenceTest do
                "comprimir_arquivos" => false
              }
 
-      Plug.Conn.send_resp(conn, 201, "")
+      conn
+      |> Plug.Conn.put_resp_content_type("text/plain")
+      |> Plug.Conn.send_resp(201, "Recorrência criada com sucesso")
     end)
 
     Efi.Test.expect(
@@ -31,7 +33,9 @@ defmodule Efi.Statements.RecurrenceTest do
                  "comprimir_arquivos" => true
                }
 
-        Plug.Conn.send_resp(conn, 201, "")
+        conn
+        |> Plug.Conn.put_resp_content_type("text/plain")
+        |> Plug.Conn.send_resp(201, "Recorrência atualizada com sucesso")
       end
     )
 
@@ -47,14 +51,14 @@ defmodule Efi.Statements.RecurrenceTest do
       ])
     end)
 
-    assert {:ok, nil} =
+    assert {:ok, "Recorrência criada com sucesso"} =
              Recurrence.create(client, %{
                "periodicidade" => "diario",
                "envia_email" => true,
                "comprimir_arquivos" => false
              })
 
-    assert {:ok, nil} =
+    assert {:ok, "Recorrência atualizada com sucesso"} =
              Recurrence.update(client, "diario", %{
                "periodicidade" => "diario",
                "status" => "ativo",

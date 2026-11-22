@@ -120,14 +120,16 @@ Toda função devolve `{:ok, corpo}` ou `{:error, %Efi.Error{}}`:
 ```elixir
 case Efi.Pix.ImmediateCharge.get(client, txid) do
   {:ok, charge} -> charge["status"]
-  {:error, %Efi.Error{kind: :not_found}} -> :desconhecida
+  {:error, %Efi.Error{name: "cobranca_nao_encontrada"}} -> :desconhecida
   {:error, %Efi.Error{kind: :transport}} -> :tentar_depois
   {:error, %Efi.Error{} = error} -> raise error
 end
 ```
 
 `kind` vem do status HTTP e é o mesmo em todas as APIs. `name` e `message` vêm do corpo, que a
-Efí escreve em formatos diferentes por API; o corpo original fica em `body`.
+Efí escreve em formatos diferentes por API; o corpo original fica em `body`. Na API Pix, uma
+cobrança, location, Pix ou devolução que não existe volta com status 400, como `:validation`:
+quem diz que o recurso não existe é o `name`, como no exemplo acima.
 
 Uma escrita que volta com `:transport` (timeout, conexão caída) ou `:server` (5xx) pode ter
 chegado à Efí. A biblioteca não repete escritas por isso: confira antes de tentar de novo, por

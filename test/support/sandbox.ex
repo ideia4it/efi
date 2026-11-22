@@ -5,7 +5,7 @@ defmodule Efi.Test.Sandbox do
   # credenciais vêm do ambiente e nunca do repositório:
   #
   #   EFI_SANDBOX_CLIENT_ID, EFI_SANDBOX_CLIENT_SECRET
-  #   EFI_SANDBOX_CERTIFICATE  caminho do .p12 de homologação
+  #   EFI_SANDBOX_CERTIFICATE  caminho do .p12 de homologação (a Cobranças não usa)
   #   EFI_SANDBOX_PIX_KEY      uma chave Pix da conta, para as cobranças
 
   def client(overrides \\ []) do
@@ -14,10 +14,10 @@ defmodule Efi.Test.Sandbox do
         client_id: fetch!("EFI_SANDBOX_CLIENT_ID"),
         client_secret: fetch!("EFI_SANDBOX_CLIENT_SECRET"),
         environment: :sandbox,
-        certificate: certificate!(),
         token_store: Efi.Test.ProcessTokenStore
       ]
       |> Keyword.merge(overrides)
+      |> Keyword.put_new_lazy(:certificate, &certificate!/0)
       |> Efi.Client.new()
 
     client

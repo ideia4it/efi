@@ -9,7 +9,7 @@ defmodule Efi.Error do
   | `:validation` | 400 ou 422: a Efí recusou os dados enviados |
   | `:unauthorized` | 401: credencial, token ou certificado recusado |
   | `:forbidden` | 403: a aplicação não tem o escopo da rota |
-  | `:not_found` | 404 |
+  | `:not_found` | 404 (na API Pix, o recurso inexistente costuma vir como 400; veja abaixo) |
   | `:conflict` | 409: o recurso já existe (por exemplo, `txid` repetido) |
   | `:precondition_failed` | 412: falta um passo antes (na Abertura de Contas, a conta ainda em análise ou o webhook não cadastrado) |
   | `:rate_limited` | 429 |
@@ -19,6 +19,11 @@ defmodule Efi.Error do
   | `:transport` | a requisição não teve resposta: timeout, conexão recusada, DNS |
   | `:certificate` | o certificado não abriu (veja `Efi.Certificate`) ou venceu (`reason: :expired`) |
   | `:configuration` | falta algo no `%Efi.Client{}` para chamar aquela API, ou a API não existe no ambiente dele |
+
+  O `kind` só olha o status. A doc do Pix põe o "não encontrado" de cobranças, locations, Pix
+  recebidos e devoluções na resposta 400 (`cobranca_nao_encontrada`, `location_nao_encontrada`,
+  `pix_nao_encontrado`, `devolucao_nao_encontrada`): ele chega como `:validation`, e é o `name`
+  que diz que o recurso não existe.
 
   `name` e `message` vêm do corpo da resposta. Cada API da Efí devolve erro num formato, e todos
   são lidos aqui:
@@ -120,7 +125,6 @@ defmodule Efi.Error do
   defp error_message(%{"error_description" => %{"message" => message}}) when is_binary(message),
     do: message
 
-  defp error_message(%{"title" => title}) when is_binary(title), do: title
   defp error_message(%{"descricao" => description}) when is_binary(description), do: description
   defp error_message(_body), do: nil
 end

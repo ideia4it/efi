@@ -11,6 +11,11 @@ defmodule Efi.BillPayments.Webhook do
   A URL precisa de HTTPS e de mTLS com a cadeia pública da Efí, no mesmo padrão do webhook Pix
   ([como configurar o servidor](https://dev.efipay.com.br/docs/api-pix/webhooks#entendendo-o-padrão-mtls)).
 
+  Atrás de um proxy que encerra o TLS (Fly.io, Heroku, Render), o app nunca vê o certificado
+  da Efí. A doc do Pagamento de Contas não cita o header `x-skip-mtls-checking`, que
+  `skip_mtls_checking: true` envia, mas os SDKs oficiais em Node e PHP o oferecem neste
+  cadastro. Confirme que a Efí aceita a URL assim e proteja-a de outra forma.
+
   ## A notificação
 
   A Efí faz um `POST` na URL com o `identificador` do pagamento, o `status` anterior e o

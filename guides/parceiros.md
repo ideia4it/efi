@@ -58,7 +58,8 @@ E nenhuma página da documentação da Efí cita o header de pular o mTLS. Ele v
 oficiais: o de Node, com `validateMtls: false`, o manda no cadastro dos webhooks do Pix, da
 Abertura de Contas e do Pagamento de Contas. No webhook Pix ele funciona em produção; na
 Abertura de Contas e no Pagamento de Contas, ainda não há confirmação. **Confirme na homologação
-antes de planejar o resto.** Se a Efí recusar o header aqui, o servidor do webhook precisa fazer
+da Abertura de Contas antes de planejar o resto.** O Pagamento de Contas não tem homologação, então
+lá a confirmação só sai em produção. Se a Efí recusar o header, o servidor do webhook precisa fazer
 o mTLS de verdade: encerrar o TLS no próprio app (no Fly.io, um serviço TCP sem o handler de
 TLS) ou pôr na frente um proxy que exija o certificado da Efí, como o Nginx do repositório
 `efipay/mtls-webhook`.

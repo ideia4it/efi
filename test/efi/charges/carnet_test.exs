@@ -10,10 +10,16 @@ defmodule Efi.Charges.CarnetTest do
   test "issues a carnet, moves and resends one parcel, settles another by hand and cancels the last" do
     client = Efi.Test.client(certificate: nil)
 
+    carnet = %{
+      "items" => [%{"name" => "Pacote de manicure", "value" => 15_000, "amount" => 1}],
+      "customer" => %{"name" => "Cliente do Studio Ana", "cpf" => "12345678909"},
+      "expire_at" => "2026-12-10",
+      "repeats" => 3,
+      "split_items" => false
+    }
+
     Efi.Test.expect(:post, "#{@host}/v1/carnet", fn conn, body ->
-      assert body["repeats"] == 3
-      assert body["expire_at"] == "2026-12-10"
-      assert body["customer"] == %{"name" => "Cliente do Studio Ana", "cpf" => "12345678909"}
+      assert body == carnet
 
       Req.Test.json(conn, %{
         "code" => 200,
@@ -44,11 +50,13 @@ defmodule Efi.Charges.CarnetTest do
       Req.Test.json(conn, %{"code" => 200})
     end)
 
-    Efi.Test.expect(:put, "#{@host}/v1/carnet/4004/parcel/1/settle", fn conn, _body ->
+    Efi.Test.expect(:put, "#{@host}/v1/carnet/4004/parcel/1/settle", fn conn, body ->
+      assert body == nil
       Req.Test.json(conn, %{"code" => 200})
     end)
 
-    Efi.Test.expect(:put, "#{@host}/v1/carnet/4004/parcel/3/cancel", fn conn, _body ->
+    Efi.Test.expect(:put, "#{@host}/v1/carnet/4004/parcel/3/cancel", fn conn, body ->
+      assert body == nil
       Req.Test.json(conn, %{"code" => 200})
     end)
 
@@ -72,13 +80,7 @@ defmodule Efi.Charges.CarnetTest do
     end)
 
     assert {:ok, %{"data" => %{"carnet_id" => 4004, "charges" => [_, _, _]}}} =
-             Carnet.create(client, %{
-               "items" => [%{"name" => "Pacote de manicure", "value" => 15_000, "amount" => 1}],
-               "customer" => %{"name" => "Cliente do Studio Ana", "cpf" => "12345678909"},
-               "expire_at" => "2026-12-10",
-               "repeats" => 3,
-               "split_items" => false
-             })
+             Carnet.create(client, carnet)
 
     assert {:ok, %{"code" => 200}} =
              Carnet.update_metadata(client, 4004, %{
@@ -157,7 +159,8 @@ defmodule Efi.Charges.CarnetTest do
   test "settles a whole carnet the customer paid off at the counter" do
     client = Efi.Test.client(certificate: nil)
 
-    Efi.Test.expect(:put, "#{@host}/v1/carnet/4004/settle", fn conn, _body ->
+    Efi.Test.expect(:put, "#{@host}/v1/carnet/4004/settle", fn conn, body ->
+      assert body == nil
       Req.Test.json(conn, %{"code" => 200})
     end)
 
@@ -167,7 +170,8 @@ defmodule Efi.Charges.CarnetTest do
   test "cancels the carnet of a customer who gave up the package" do
     client = Efi.Test.client(certificate: nil)
 
-    Efi.Test.expect(:put, "#{@host}/v1/carnet/4004/cancel", fn conn, _body ->
+    Efi.Test.expect(:put, "#{@host}/v1/carnet/4004/cancel", fn conn, body ->
+      assert body == nil
       Req.Test.json(conn, %{"code" => 200})
     end)
 

@@ -12,9 +12,14 @@ defmodule Efi.Charges.PaymentLinkTest do
   test "sends the customer a payment link in one step" do
     client = Efi.Test.client(certificate: nil)
 
+    link = %{
+      "items" => [%{"name" => "Coloração", "value" => 18_000, "amount" => 1}],
+      "customer" => %{"email" => "cliente@app.example.com"},
+      "settings" => %{"payment_method" => "all", "expire_at" => "2026-12-20"}
+    }
+
     Efi.Test.expect(:post, "#{@host}/v1/charge/one-step/link", fn conn, body ->
-      assert body["customer"] == %{"email" => "cliente@app.example.com"}
-      assert body["settings"] == %{"payment_method" => "all", "expire_at" => "2026-12-20"}
+      assert body == link
 
       Req.Test.json(conn, %{
         "code" => 200,
@@ -23,17 +28,14 @@ defmodule Efi.Charges.PaymentLinkTest do
     end)
 
     assert {:ok, %{"data" => %{"status" => "link", "payment_url" => @payment_url}}} =
-             PaymentLink.create_one_step(client, %{
-               "items" => [%{"name" => "Coloração", "value" => 18_000, "amount" => 1}],
-               "customer" => %{"email" => "cliente@app.example.com"},
-               "settings" => %{"payment_method" => "all", "expire_at" => "2026-12-20"}
-             })
+             PaymentLink.create_one_step(client, link)
   end
 
   test "creates a charge, links it to the payment page, offers a boleto discount and resends the link" do
     client = Efi.Test.client(certificate: nil)
 
-    Efi.Test.expect(:post, "#{@host}/v1/charge", fn conn, _body ->
+    Efi.Test.expect(:post, "#{@host}/v1/charge", fn conn, body ->
+      assert body == %{"items" => [%{"name" => "Coloração", "value" => 18_000, "amount" => 1}]}
       Req.Test.json(conn, %{"code" => 200, "data" => %{"charge_id" => 6007, "status" => "new"}})
     end)
 

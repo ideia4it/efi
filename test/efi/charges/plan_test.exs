@@ -45,7 +45,8 @@ defmodule Efi.Charges.PlanTest do
       })
     end)
 
-    Efi.Test.expect(:delete, "#{@host}/v1/plan/7007", fn conn, _body ->
+    Efi.Test.expect(:delete, "#{@host}/v1/plan/7007", fn conn, body ->
+      assert body == nil
       Req.Test.json(conn, %{"code" => 200})
     end)
 

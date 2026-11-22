@@ -1348,6 +1348,22 @@
   "skip": "só no SDK de Node; a doc (conferida em 22/11/2026) documenta POST /v1/charge/card, em Efi.Charges.Card.create/3. O SDK de PHP trocou /v2 por /v1 em 09/11/2026, e /v2/charge/card responde 404 nos dois hosts"
  },
  {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/partner/charge/one-step",
+  "scope": null,
+  "doc": null,
+  "skip": "só nos SDKs de PHP, Ruby e Java, sem exemplo; nenhuma página do sitemap da doc (conferido em 22/11/2026) cita a rota nem o header partner-token"
+ },
+ {
+  "family": "cobrancas",
+  "method": "POST",
+  "path": "/v1/partner/charge/:id/pay",
+  "scope": null,
+  "doc": null,
+  "skip": "só nos SDKs de PHP, Ruby e Java, sem exemplo; nenhuma página do sitemap da doc (conferido em 22/11/2026) cita a rota nem o header partner-token"
+ },
+ {
   "family": "pix",
   "method": "PUT",
   "path": "/v2/gn/split/cob/:txid/vinculo/:splitConfigId",

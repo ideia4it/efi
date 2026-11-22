@@ -14,9 +14,9 @@ defmodule Efi.Charges.Notification do
 
   O `POST` não traz dado nenhum da cobrança, então não há assinatura a conferir: quem garante
   que a notificação é verdadeira é a consulta autenticada à Efí. A Efí só considera a
-  notificação entregue depois dessa consulta e, sem ela, continua reenviando. Se a URL não
-  responder 2xx, a Efí tenta de novo até 10 vezes, em intervalos crescentes a partir de 5
-  minutos.
+  notificação entregue depois dessa consulta e, sem ela, continua reenviando por até 3 dias. Se
+  a URL não responder 2xx, a Efí tenta de novo até 10 vezes, em intervalos crescentes a partir
+  de 5 minutos.
 
       def create(conn, %{"notification" => token}) do
         {:ok, %{"data" => changes}} = Efi.Charges.Notification.get(client, token)

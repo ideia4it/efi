@@ -1345,7 +1345,7 @@
   "scope": null,
   "doc": null,
   "note": "fora da extração automática da doc; conferir na página",
-  "skip": "só no SDK de Node; a doc (conferida em 19/11/2026) documenta POST /v1/charge/card, em Efi.Charges.Card.create/3"
+  "skip": "só no SDK de Node; a doc (conferida em 22/11/2026) documenta POST /v1/charge/card, em Efi.Charges.Card.create/3. O SDK de PHP trocou /v2 por /v1 em 09/11/2026, e /v2/charge/card responde 404 nos dois hosts"
  },
  {
   "family": "pix",

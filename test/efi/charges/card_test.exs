@@ -3,6 +3,7 @@ defmodule Efi.Charges.CardTest do
 
   alias Efi.Charges.Card
   alias Efi.Charges.Charge
+  alias Efi.Charges.Notification
 
   setup {Req.Test, :verify_on_exit!}
 
@@ -21,7 +22,7 @@ defmodule Efi.Charges.CardTest do
     "state" => "MG"
   }
 
-  test "shows the installments, charges the card with 3DS and gets a challenge back" do
+  test "shows the installments, charges the card with 3DS and learns from the notification that the challenge passed" do
     client = Efi.Test.client(certificate: nil)
 
     charge = %{
@@ -67,8 +68,34 @@ defmodule Efi.Charges.CardTest do
     assert {:ok, %{"data" => %{"installments" => [_one, %{"installment" => 2}]}}} =
              Card.list_installments(client, %{"brand" => "visa", "total" => 20_000})
 
+    Efi.Test.expect(:get, "#{@host}/v1/notification/token-da-notificacao", fn conn, _body ->
+      Req.Test.json(conn, %{
+        "code" => 200,
+        "data" => [
+          %{
+            "id" => 1,
+            "type" => "charge",
+            "identifiers" => %{"charge_id" => 3003},
+            "status" => %{"current" => "waiting", "previous" => nil}
+          },
+          %{
+            "id" => 2,
+            "type" => "charge",
+            "identifiers" => %{"charge_id" => 3003},
+            "status" => %{"current" => "approved", "previous" => "waiting"}
+          }
+        ]
+      })
+    end)
+
     assert {:ok, %{"status" => "waiting", "tds_challenge" => %{"html_template" => _html}}} =
              Card.create(client, charge)
+
+    assert {:ok, %{"data" => [_waiting, approval]}} =
+             Notification.get(client, "token-da-notificacao")
+
+    assert %{"identifiers" => %{"charge_id" => 3003}, "status" => %{"current" => "approved"}} =
+             approval
   end
 
   test "is refused by the issuer, pays on the retry with another card and refunds part of it" do

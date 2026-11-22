@@ -120,7 +120,6 @@ defmodule Efi.Error do
   defp error_message(%{"error_description" => %{"message" => message}}) when is_binary(message),
     do: message
 
-  defp error_message(%{"title" => title}) when is_binary(title), do: title
   defp error_message(%{"descricao" => description}) when is_binary(description), do: description
   defp error_message(_body), do: nil
 end
